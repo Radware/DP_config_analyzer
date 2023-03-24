@@ -219,45 +219,16 @@ class Vision:
 
 		return
 
-
-	def getAllDPConfigs(self):
-		# Download DefensePro configuration file for all DefensePro
-
-		for key in self.device_list:
-
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-				self.getDPConfigByDevice(key)
-			
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-					self.getDPConfigByDevice(key)
-				else:
-					print(f'DefensePro Configuration file for {key} has not been downloaded. Not in DP_IP_SCOPE_LIST')
-
-		return
 	
-	def getFullPolicyDictionary(self):
+	def getFullPolicyDictionary(self,key,val):
 		# Create Full Policies list with attributes dictionary per DefensePro
 
 		full_pol_dic = {}
-		for key, val in self.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
-			
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect all policies for all DefensePro
-				full_pol_dic[key] = {}
-				full_pol_dic[key]['Name'] = val['Name']
-				full_pol_dic[key]['Version'] = val['Version']
-				full_pol_dic[key]['Policies'] = self.getPolicyListByDevice(key)
-			
 
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-					full_pol_dic[key] = {}
-					full_pol_dic[key]['Name'] = val['Name']
-					full_pol_dic[key]['Version'] = val['Version']
-					full_pol_dic[key]['Policies'] = self.getPolicyListByDevice(key)
-				else:
-					print(f'Policy list for {key},{val["Name"]} not downloaded. Not in DP_IP_SCOPE_LIST')
+		full_pol_dic[key] = {}
+		full_pol_dic[key]['Name'] = val['Name']
+		full_pol_dic[key]['Version'] = val['Version']
+		full_pol_dic[key]['Policies'] = self.getPolicyListByDevice(key)
 
 
 		with open(raw_data_path + 'full_pol_dic.json', 'w') as full_pol_dic_file:
@@ -265,21 +236,10 @@ class Vision:
 
 		return full_pol_dic
 
-	def getFullSignatureProfileDictionary(self):
+	def getFullSignatureProfileDictionary(self,key,val):
 		# Create Full Signature profile list with rules dictionary per DefensePro
 		full_sig_dic = {}
-
-		for key in self.device_list:
-
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-				full_sig_dic[key] = self.getSignatureProfileListByDevice(key)
-			
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-					full_sig_dic[key] = self.getSignatureProfileListByDevice(key)
-				else:
-					print(f'Signature list for {key} not downloaded. Not in DP_IP_SCOPE_LIST')
+		full_sig_dic[key] = self.getSignatureProfileListByDevice(key)
 
 
 		with open(raw_data_path + 'full_sig_dic.json', 'w') as full_sig_dic_file:
@@ -287,104 +247,49 @@ class Vision:
 			
 		return full_sig_dic
 
-	def getFullNetClassDictionary(self):
+	def getFullNetClassDictionary(self,key,val):
 		# Create Full Network class profile list with networks dictionary per DefensePro
 		full_net_dic = {}
+		full_net_dic[key] = {}
+		
 
-		for key,value in self.device_list.items():
+		if self.getNetClassListByDevice(key) == ([]): #If DefensePro is unreachable
+			full_net_dic[key]['rsBWMNetworkTable'] = []
+
+		else:
+
+			full_net_dic[key] = self.getNetClassListByDevice(key)
+			full_net_dic[key]['Name'] = val['Name']
 			
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-
-				full_net_dic[key] = {}
-				
-
-				if self.getNetClassListByDevice(key) == ([]): #If DefensePro is unreachable
-					full_net_dic[key]['rsBWMNetworkTable'] = []
-					continue
-
-				else:
-
-					full_net_dic[key] = self.getNetClassListByDevice(key)
-					full_net_dic[key]['Name'] = value['Name']
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-					full_net_dic[key] = {}
-					full_net_dic[key]['Name'] = {}
-
-					if self.getNetClassListByDevice(key) == ([]): #If DefensePro is unreachable
-						full_net_dic[key]['rsBWMNetworkTable'] = []
-
-					else:
-						full_net_dic[key] = self.getNetClassListByDevice(key)
-
-					full_net_dic[key]['Name'] = value['Name']
-
-				else:
-					print(f'Network class list for {key} not downloaded. Not in DP_IP_SCOPE_LIST')
-			
-
-
 
 		with open(raw_data_path + 'full_net_dic.json', 'w') as full_net_dic_file:
 			json.dump(full_net_dic,full_net_dic_file)
 		
 		return full_net_dic
 
-	def getFullBDOSProfConfigDictionary(self):
+	def getFullBDOSProfConfigDictionary(self,key,val):
 		# Create Full BDOS Profile config list with all BDOS attributes dictionary per DefensePro
 
 		full_bdosprofconf_dic = {}
+		full_bdosprofconf_dic[key] = {}
+		full_bdosprofconf_dic[key]['Name'] = val['Name']
+		full_bdosprofconf_dic[key]['Version'] = val['Version']
+		full_bdosprofconf_dic[key]['Policies'] = self.getBDOSProfileConfigByDevice(key)
 
-		for key, val in self.device_list.items():
 
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-
-				full_bdosprofconf_dic[key] = {}
-				full_bdosprofconf_dic[key]['Name'] = val['Name']
-				full_bdosprofconf_dic[key]['Version'] = val['Version']
-				full_bdosprofconf_dic[key]['Policies'] = self.getBDOSProfileConfigByDevice(key)
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-
-					full_bdosprofconf_dic[key] = {}
-					full_bdosprofconf_dic[key]['Name'] = val['Name']
-					full_bdosprofconf_dic[key]['Version'] = val['Version']
-					full_bdosprofconf_dic[key]['Policies'] = self.getBDOSProfileConfigByDevice(key)
-
-				else:
-					print(f'BDOS stats for {key} not downloaded. Not in DP_IP_SCOPE_LIST')
-		
 		with open(raw_data_path + 'full_bdosprofconf_dic.json', 'w') as full_bdosprofconf_dic_file:
 			json.dump(full_bdosprofconf_dic,full_bdosprofconf_dic_file)
 
 		return full_bdosprofconf_dic
 
-	def getFullDNSProfConfigDictionary(self):
+	def getFullDNSProfConfigDictionary(self,key,val):
 		# Create Full DNS Profile config list with all BDOS attributes dictionary per DefensePro
 
 		full_dnsprofconf_dic = {}
-		for key, val in self.device_list.items():
-
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-
-				full_dnsprofconf_dic[key] = {}
-				full_dnsprofconf_dic[key]['Name'] = val['Name']
-				full_dnsprofconf_dic[key]['Version'] = val['Version']
-				full_dnsprofconf_dic[key]['Policies'] = self.getDNSProfileConfigByDevice(key)
-
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if key in cfg.DP_IP_SCOPE_LIST:
-
-					full_dnsprofconf_dic[key] = {}
-					full_dnsprofconf_dic[key]['Name'] = val['Name']
-					full_dnsprofconf_dic[key]['Version'] = val['Version']
-					full_dnsprofconf_dic[key]['Policies'] = self.getDNSProfileConfigByDevice(key)
-
-				else:
-					print(f'DNS stats for {key} not downloaded. Not in DP_IP_SCOPE_LIST')
+		full_dnsprofconf_dic[key] = {}
+		full_dnsprofconf_dic[key]['Name'] = val['Name']
+		full_dnsprofconf_dic[key]['Version'] = val['Version']
+		full_dnsprofconf_dic[key]['Policies'] = self.getDNSProfileConfigByDevice(key)
 
 		with open(raw_data_path + 'full_dnsprofconf_dic.json', 'w') as full_dnsprofconf_dic_file:
 			json.dump(full_dnsprofconf_dic,full_dnsprofconf_dic_file)
@@ -393,73 +298,34 @@ class Vision:
 
 
 
-	def getFullSYNPConfigDictionary(self):
+	def getFullSYNPConfigDictionary(self,dp_ip,val):
 		# Create Full SYNP Profile config list with all BDOS attributes dictionary per DefensePro
 
 		full_synpprofconf_dic = {}
+		full_synpprofconf_dic[dp_ip] = {}
+		full_synpprofconf_dic[dp_ip]['Name'] = val['Name']
+		full_synpprofconf_dic[dp_ip]['Version'] = val['Version']
+
+		synp_prof_list = self.getSYNPProfileListByDevice(dp_ip)
+		synp_prof_params_table = self.getSYNPProfileParamsByDevice(dp_ip)
+		synp_protections_table = self.getSYNPProtectionsTableByDevice(dp_ip)
+
+		full_synpprofconf_dic[dp_ip]['Profiles'] = {}
 		
-		for dp_ip, val in self.device_list.items():
-
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-
-				full_synpprofconf_dic[dp_ip] = {}
-				full_synpprofconf_dic[dp_ip]['Name'] = val['Name']
-				full_synpprofconf_dic[dp_ip]['Version'] = val['Version']
-
-				synp_prof_list = self.getSYNPProfileListByDevice(dp_ip)
-				synp_prof_params_table = self.getSYNPProfileParamsByDevice(dp_ip)
-				synp_protections_table = self.getSYNPProtectionsTableByDevice(dp_ip)
-
-				full_synpprofconf_dic[dp_ip]['Profiles'] = {}
-				
-				if synp_prof_params_table: #If table is not empty
-					for synp_prof_param_set in synp_prof_params_table['rsIDSSynProfilesParamsTable']:
-						full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']] = {}
-						full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Parameters'] = synp_prof_param_set
+		if synp_prof_params_table: #If table is not empty
+			for synp_prof_param_set in synp_prof_params_table['rsIDSSynProfilesParamsTable']:
+				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']] = {}
+				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Parameters'] = synp_prof_param_set
 
 
-						full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'] = []
+				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'] = []
 
-						for synp_prof in synp_prof_list['rsIDSSynProfilesTable']:
-							if synp_prof['rsIDSSynProfilesName'] == synp_prof_param_set['rsIDSSynProfilesParamsName']:
-							
-								for syn_protection in synp_protections_table['rsIDSSYNAttackTable']:
-									if syn_protection['rsIDSSYNAttackName'] == synp_prof['rsIDSSynProfileServiceName']:
-										full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'].append(syn_protection)
-
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if dp_ip in cfg.DP_IP_SCOPE_LIST:
-
-					full_synpprofconf_dic[dp_ip] = {}
-					full_synpprofconf_dic[dp_ip]['Name'] = val['Name']
-					full_synpprofconf_dic[dp_ip]['Version'] = val['Version']
-
-					synp_prof_list = self.getSYNPProfileListByDevice(dp_ip)
-					synp_prof_params_table = self.getSYNPProfileParamsByDevice(dp_ip)
-					synp_protections_table = self.getSYNPProtectionsTableByDevice(dp_ip)
-
-					full_synpprofconf_dic[dp_ip]['Profiles'] = {}
+				for synp_prof in synp_prof_list['rsIDSSynProfilesTable']:
+					if synp_prof['rsIDSSynProfilesName'] == synp_prof_param_set['rsIDSSynProfilesParamsName']:
 					
-					if synp_prof_params_table: #If table is not empty
-						for synp_prof_param_set in synp_prof_params_table['rsIDSSynProfilesParamsTable']:
-							full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']] = {}
-							full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Parameters'] = synp_prof_param_set
-
-
-							full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'] = []
-
-							for synp_prof in synp_prof_list['rsIDSSynProfilesTable']:
-								if synp_prof['rsIDSSynProfilesName'] == synp_prof_param_set['rsIDSSynProfilesParamsName']:
-								
-									for syn_protection in synp_protections_table['rsIDSSYNAttackTable']:
-										if syn_protection['rsIDSSYNAttackName'] == synp_prof['rsIDSSynProfileServiceName']:
-											full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'].append(syn_protection)
-
-
-
-				else:
-					print(f'SYN Flood configuration for {dp_ip} not downloaded. Not in DP_IP_SCOPE_LIST')
+						for syn_protection in synp_protections_table['rsIDSSYNAttackTable']:
+							if syn_protection['rsIDSSYNAttackName'] == synp_prof['rsIDSSynProfileServiceName']:
+								full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'].append(syn_protection)
 					
 
 		with open(raw_data_path + 'full_synprofconf_dic.json', 'w') as full_synpconf_dic_file:
@@ -468,74 +334,34 @@ class Vision:
 		return full_synpprofconf_dic
 
 
-	def getFullConnlimConfigDictionary(self):
+	def getFullConnlimConfigDictionary(self,dp_ip,val):
 		# Create Full Connection Limit Profile config list with all BDOS attributes dictionary per DefensePronnectionLimitProfileName
 
 		full_connlimprofconf_dic = {}
+		full_connlimprofconf_dic[dp_ip] = {}
+		full_connlimprofconf_dic[dp_ip]['Name'] = val['Name']
+		full_connlimprofconf_dic[dp_ip]['Version'] = val['Version']
+
+		connlim_prof_list = self.getConnlimProfileListByDevice(dp_ip)
+		connlim_prof_attack_table = self.getConnlimProfileAttackTableByDevice(dp_ip)
+
+
+		full_connlimprofconf_dic[dp_ip]['Profiles'] = {}
 		
-		for dp_ip, val in self.device_list.items():
+		if connlim_prof_list: #If table is not empty
 
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
+			for connlim_prof in connlim_prof_list['rsIDSConnectionLimitProfileTable']:
 
-				full_connlimprofconf_dic[dp_ip] = {}
-				full_connlimprofconf_dic[dp_ip]['Name'] = val['Name']
-				full_connlimprofconf_dic[dp_ip]['Version'] = val['Version']
+				if full_connlimprofconf_dic[dp_ip]['Profiles'].get(connlim_prof['rsIDSConnectionLimitProfileName']) is None:
+					full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']] = {}
 
-				connlim_prof_list = self.getConnlimProfileListByDevice(dp_ip)
-				connlim_prof_attack_table = self.getConnlimProfileAttackTableByDevice(dp_ip)
+				if full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']].get('Protections') is None:
+					full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'] = []
 
+				for connlim_protectionid in connlim_prof_attack_table['rsIDSConnectionLimitAttackTable']:
 
-				full_connlimprofconf_dic[dp_ip]['Profiles'] = {}
-				
-				if connlim_prof_list: #If table is not empty
-
-					for connlim_prof in connlim_prof_list['rsIDSConnectionLimitProfileTable']:
-
-						if full_connlimprofconf_dic[dp_ip]['Profiles'].get(connlim_prof['rsIDSConnectionLimitProfileName']) is None:
-							full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']] = {}
-
-						if full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']].get('Protections') is None:
-							full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'] = []
-
-						for connlim_protectionid in connlim_prof_attack_table['rsIDSConnectionLimitAttackTable']:
-
-							if connlim_protectionid['rsIDSConnectionLimitAttackId'] == connlim_prof['rsIDSConnectionLimitProfileAttackId']:
-								full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'].append(connlim_protectionid)
-						
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if dp_ip in cfg.DP_IP_SCOPE_LIST:
-
-					full_connlimprofconf_dic[dp_ip] = {}
-					full_connlimprofconf_dic[dp_ip]['Name'] = val['Name']
-					full_connlimprofconf_dic[dp_ip]['Version'] = val['Version']
-
-					connlim_prof_list = self.getConnlimProfileListByDevice(dp_ip)
-					connlim_prof_attack_table = self.getConnlimProfileAttackTableByDevice(dp_ip)
-
-
-					full_connlimprofconf_dic[dp_ip]['Profiles'] = {}
-					
-					if connlim_prof_list: #If table is not empty
-
-						for connlim_prof in connlim_prof_list['rsIDSConnectionLimitProfileTable']:
-
-							if full_connlimprofconf_dic[dp_ip]['Profiles'].get(connlim_prof['rsIDSConnectionLimitProfileName']) is None:
-								full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']] = {}
-
-							if full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']].get('Protections') is None:
-								full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'] = []
-
-							for connlim_protectionid in connlim_prof_attack_table['rsIDSConnectionLimitAttackTable']:
-
-								if connlim_protectionid['rsIDSConnectionLimitAttackId'] == connlim_prof['rsIDSConnectionLimitProfileAttackId']:
-									full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'].append(connlim_protectionid)
-							
-
-
-				else:
-					print(f'Connection Limit configuration for {dp_ip} not downloaded. Not in DP_IP_SCOPE_LIST')
-
+					if connlim_protectionid['rsIDSConnectionLimitAttackId'] == connlim_prof['rsIDSConnectionLimitProfileAttackId']:
+						full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'].append(connlim_protectionid)
 
 
 		with open(raw_data_path + 'full_connlimprofconf_dic.json', 'w') as full_connlimprofconf_file:
@@ -543,53 +369,24 @@ class Vision:
 
 		return full_connlimprofconf_dic
 	
-	def getFullOOSConfigDictionary(self):
+	def getFullOOSConfigDictionary(self,dp_ip,val):
 		# Create Full Out of State Profile config list with all BDOS attributes dictionary per DefensePro
 
 		full_oosprofconf_dic = {}
+		full_oosprofconf_dic[dp_ip] = {}
+		full_oosprofconf_dic[dp_ip]['Name'] = val['Name']
+		full_oosprofconf_dic[dp_ip]['Version'] = val['Version']
+
+		oos_prof_list = self.getOOSProfileListByDevice(dp_ip)
+
+
+		full_oosprofconf_dic[dp_ip]['Profiles'] = []
 		
-		for dp_ip, val in self.device_list.items():
+		if oos_prof_list: #If table is not empty
 
-			if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect from all DefensePro
-
-				full_oosprofconf_dic[dp_ip] = {}
-				full_oosprofconf_dic[dp_ip]['Name'] = val['Name']
-				full_oosprofconf_dic[dp_ip]['Version'] = val['Version']
-
-				oos_prof_list = self.getOOSProfileListByDevice(dp_ip)
-
-
-				full_oosprofconf_dic[dp_ip]['Profiles'] = []
+			for oos_prof in oos_prof_list['rsStatefulProfileTable']:
 				
-				if oos_prof_list: #If table is not empty
-
-					for oos_prof in oos_prof_list['rsStatefulProfileTable']:
-						
-						full_oosprofconf_dic[dp_ip]['Profiles'].append(oos_prof)	
-
-
-
-			else: #If DP_IP_SCOPE_LIST is not empty
-				if dp_ip in cfg.DP_IP_SCOPE_LIST:
-
-					full_oosprofconf_dic[dp_ip] = {}
-					full_oosprofconf_dic[dp_ip]['Name'] = val['Name']
-					full_oosprofconf_dic[dp_ip]['Version'] = val['Version']
-
-					oos_prof_list = self.getOOSProfileListByDevice(dp_ip)
-
-
-					full_oosprofconf_dic[dp_ip]['Profiles'] = []
-					
-					if oos_prof_list: #If table is not empty
-
-						for oos_prof in oos_prof_list['rsStatefulProfileTable']:
-							
-							full_oosprofconf_dic[dp_ip]['Profiles'].append(oos_prof)	
-
-				else:
-					print(f'OOS configuration for {dp_ip} not downloaded. Not in DP_IP_SCOPE_LIST')
-
+				full_oosprofconf_dic[dp_ip]['Profiles'].append(oos_prof)	
 
 
 		with open(raw_data_path + 'full_oosprofconf_dic.json', 'w') as full_oosprofconf_file:

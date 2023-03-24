@@ -106,6 +106,9 @@ V2.6
 
 4.0
 	- Added choosing DefensePro Scope
+		!!! New mandatory variable "DP_IP_SCOPE_LIST" added into config.py, add below line into "config.py"
+			DP_IP_SCOPE_LIST = [] # List of DefensePro IP addresses to analyze, comma separated, example ['1.1.1.2','1.1.1.3']. if empty []- analyze all DefensePro in Vision
+
 	- Added cleaning up existing DP config before collecting new ones
 	- Added writing device list to the raw json file
 
