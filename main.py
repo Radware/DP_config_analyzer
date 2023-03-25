@@ -94,89 +94,103 @@ if getdatafromvision:
 	logging_helper.logging.info('Cleaning up previous DP config files')
 	v.dpconfig_cleanup()
 
+	print('Starting collecting data from DefensePro')
+	print('-' * 50)
 
-	for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
-		
-		if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect all policies for all DefensePro
-			print('Collecting policies data from all DefensePro')
-			logging_helper.logging.info('Collecting policies data from all DefensePro')
+
+
+	if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect all policies for all DefensePro
+		print('DP_IP_SCOPE_LIST is not defined - collecting data from all DefensePro in Vision')
+
+		for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+
+			print(f'Collecting policies data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting policies data from Defensepro {key}')
 			full_pol_dic = v.getFullPolicyDictionary(key,val)
 
-			print('Collecting signature profiles data from all DefensePro')
-			logging_helper.logging.info('Collecting signature profiles data from all DefensePro')
+			print(f'Collecting signature profiles data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting signature profiles data from Defensepro {key}')
 			full_sig_dic = v.getFullSignatureProfileDictionary(key,val)
 
-			print('Collecting network classes data from all DefensePro')
-			logging_helper.logging.info('Collecting network classes data from all DefensePro')
+			print(f'Collecting network classes data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting network classes data from Defensepro {key}')
 			full_net_dic = v.getFullNetClassDictionary(key,val)
 
-			print('Collecting BDOS configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting BDOS configuration data from all DefensePro')
+			print(f'Collecting BDOS configuration data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting BDOS configuration data from Defensepro {key}')
 			full_bdosprofconf_dic = v.getFullBDOSProfConfigDictionary(key,val)
 
-			print('Collecting DNS configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting DNS configuration data from all DefensePro')
+			print(f'Collecting DNS configuration data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting DNS configuration data from Defensepro {key}')
 			full_dnsprofconf_dic = v.getFullDNSProfConfigDictionary(key,val)
 
-			print('Collecting SynFlood configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting SynFlood configuration data from all DefensePro')
+			print(f'Collecting SynFlood configuration data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting SynFlood configuration data from Defensepro {key}')
 			full_synprofconf_dic = v.getFullSYNPConfigDictionary(key,val)
 
-			print('Collecting Connection Limit configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting Connection Limit configuration data from all DefensePro')
+			print(f'Collecting Connection Limit configuration data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting Connection Limit configuration data from Defensepro {key}')
 			full_connlimprofconf_dic = v.getFullConnlimConfigDictionary(key,val)
 
-			print('Collecting Out of State configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting Out of State configuration data from all DefensePro')
+			print(f'Collecting Out of State configuration data from Defensepro {key}')
+			logging_helper.logging.info(f'Collecting Out of State configuration data from Defensepro {key}')
 			full_oosprofconf_dic = v.getFullOOSConfigDictionary(key,val)
 
-			print('Downloading DefensePro configuration files')
-			logging_helper.logging.info('Downloading DefensePro configuration files')
+			print(f'Downloading configuration file from Defensepro {key}')
+			logging_helper.logging.info(f'Downloading configuration file from Defensepro {key}')
 			v.getDPConfigByDevice(key)
-		
+			print('-' * 25)
 
 
-		elif key in cfg.DP_IP_SCOPE_LIST:#If DP_IP_SCOPE_LIST is not empty
-			print('Collecting policies data from defined DefensePro in DP_IP_SCOPE_LIST')
-			logging_helper.logging.info('Collecting policies data from all DefensePro')
-			full_pol_dic = v.getFullPolicyDictionary(key,val)
+	else:
+		print('DP_IP_SCOPE_LIST is defined - collecting data from specific DefensePro in the list')
+		print('-' * 25)
 
-			print('Collecting signature profiles data from all DefensePro')
-			logging_helper.logging.info('Collecting signature profiles data from all DefensePro')
-			full_sig_dic = v.getFullSignatureProfileDictionary(key,val)
+		for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+			if key in cfg.DP_IP_SCOPE_LIST:
+				
+				print(f'Collecting policies data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting policies data from Defensepro {key}')
+				full_pol_dic = v.getFullPolicyDictionary(key,val)
 
-			print('Collecting network classes data from all DefensePro')
-			logging_helper.logging.info('Collecting network classes data from all DefensePro')
-			full_net_dic = v.getFullNetClassDictionary(key,val)
+				print(f'Collecting signature profiles data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting signature profiles data from Defensepro {key}')
+				full_sig_dic = v.getFullSignatureProfileDictionary(key,val)
 
-			print('Collecting BDOS configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting BDOS configuration data from all DefensePro')
-			full_bdosprofconf_dic = v.getFullBDOSProfConfigDictionary(key,val)
+				print(f'Collecting network classes data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting network classes data from Defensepro {key}')
+				full_net_dic = v.getFullNetClassDictionary(key,val)
 
-			print('Collecting DNS configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting DNS configuration data from all DefensePro')
-			full_dnsprofconf_dic = v.getFullDNSProfConfigDictionary(key,val)
+				print(f'Collecting BDOS configuration data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting BDOS configuration data from Defensepro {key}')
+				full_bdosprofconf_dic = v.getFullBDOSProfConfigDictionary(key,val)
 
-			print('Collecting SynFlood configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting SynFlood configuration data from all DefensePro')
-			full_synprofconf_dic = v.getFullSYNPConfigDictionary(key,val)
+				print(f'Collecting DNS configuration data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting DNS configuration data from Defensepro {key}')
+				full_dnsprofconf_dic = v.getFullDNSProfConfigDictionary(key,val)
 
-			print('Collecting Connection Limit configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting Connection Limit configuration data from all DefensePro')
-			full_connlimprofconf_dic = v.getFullConnlimConfigDictionary(key,val)
+				print(f'Collecting SynFlood configuration data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting SynFlood configuration data from Defensepro {key}')
+				full_synprofconf_dic = v.getFullSYNPConfigDictionary(key,val)
 
-			print('Collecting Out of State configuration data from all DefensePro')
-			logging_helper.logging.info('Collecting Out of State configuration data from all DefensePro')
-			full_oosprofconf_dic = v.getFullOOSConfigDictionary(key,val)
+				print(f'Collecting Connection Limit configuration data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting Connection Limit configuration data from Defensepro {key}')
+				full_connlimprofconf_dic = v.getFullConnlimConfigDictionary(key,val)
 
-			print('Downloading DefensePro configuration files')
-			logging_helper.logging.info('Downloading DefensePro configuration files')
-			v.getDPConfigByDevice(key)
+				print(f'Collecting Out of State configuration data from Defensepro {key}')
+				logging_helper.logging.info(f'Collecting Out of State configuration data from Defensepro {key}')
+				full_oosprofconf_dic = v.getFullOOSConfigDictionary(key,val)
 
-		else:
-			print(f'Data for {key},{val["Name"]} is not downloaded. Not in DP_IP_SCOPE_LIST')
+				print(f'Downloading configuration file from Defensepro {key}')
+				logging_helper.logging.info(f'Downloading configuration file from Defensepro {key}')
+				v.getDPConfigByDevice(key)
+				print('-' * 25)
+			else:
+				print(f'Skipping data collection for Defensepro {key} - {val["Name"]}. Not in DP_IP_SCOPE_LIST')
+				print('-' * 25)
 
 	print('Data collection is complete')
+	print('-' * 50)
 	logging_helper.logging.info('Data collection is complete')
 
 print('Starting data parsing')
