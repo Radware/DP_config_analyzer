@@ -111,6 +111,7 @@ V2.6
 
 	- Added cleaning up existing DP config before collecting new ones
 	- Added writing device list to the raw json file
+	- Added run.sh (necessary if run from the container)
 
 # Functionality to be added:
 
