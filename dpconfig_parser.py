@@ -199,7 +199,8 @@ class DataParser():
 
 			self.parseDPConfig(dp_ip, dp_name) #Perform DP config files checks
 
-		self.netClassDuplication(self.full_net_dic, self.full_pol_dic) #Check if network class is unused, shared, duplicate or subnet of another class
+		if self.isDPAvailable(dp_ip, dp_attr):
+			self.netClassDuplication(self.full_net_dic, self.full_pol_dic) #Check if network class is unused, shared, duplicate or subnet of another class
 
 
 		report = reports_path + 'dpconfig_report.csv'
@@ -218,6 +219,12 @@ class DataParser():
 		# DP is considerd unavailable if DP is unreachable or no policy exists
 		dp_name = dp_attr['Name']
 		
+		if not dp_attr['Policies']:
+			with open(reports_path + 'dpconfig_report.csv', mode='a', newline="") as dpconfig_report:
+					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , 'DefensePro is unreachable'])
+			return False
+
 		if dp_attr['Policies'] == ([]):
 			# self.parseDict[dp_ip] = "DefensePro is unreachable"
 			with open(reports_path + 'dpconfig_report.csv', mode='a', newline="") as dpconfig_report:

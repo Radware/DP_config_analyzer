@@ -56,10 +56,7 @@ class Vision:
 
 		return dev_list
 
-	def dpconfig_cleanup(self):
-		# For every file  in config_path delete it
-		for file in os.listdir(config_path):
-			os.remove(config_path + file)
+
 	
 	def getSignatureProfileListByDevice(self, dp_ip):
 		# Returns Signature profile list with rules
@@ -220,10 +217,9 @@ class Vision:
 		return
 
 	
-	def getFullPolicyDictionary(self,key,val):
+	def getFullPolicyDictionary(self,key,val,full_pol_dic):
 		# Create Full Policies list with attributes dictionary per DefensePro
 
-		full_pol_dic = {}
 
 		full_pol_dic[key] = {}
 		full_pol_dic[key]['Name'] = val['Name']
@@ -231,113 +227,100 @@ class Vision:
 		full_pol_dic[key]['Policies'] = self.getPolicyListByDevice(key)
 
 
-		with open(raw_data_path + 'full_pol_dic.json', 'w') as full_pol_dic_file:
-			json.dump(full_pol_dic,full_pol_dic_file)
 
 		return full_pol_dic
 
-	def getFullSignatureProfileDictionary(self,key,val):
+	def getFullSignatureProfileDictionary(self,key,val,full_sig_dic):
 		# Create Full Signature profile list with rules dictionary per DefensePro
-		full_sig_dic = {}
+
 		full_sig_dic[key] = self.getSignatureProfileListByDevice(key)
 
 
-		with open(raw_data_path + 'full_sig_dic.json', 'w') as full_sig_dic_file:
-			json.dump(full_sig_dic,full_sig_dic_file)
+
 			
 		return full_sig_dic
 
-	def getFullNetClassDictionary(self,key,val):
+	def getFullNetClassDictionary(self,key,val,full_net_dic):
 		# Create Full Network class profile list with networks dictionary per DefensePro
-		full_net_dic = {}
 		full_net_dic[key] = {}
 		
 
 		if self.getNetClassListByDevice(key) == ([]): #If DefensePro is unreachable
 			full_net_dic[key]['rsBWMNetworkTable'] = []
+			full_net_dic[key]['Name'] = val['Name']
 
 		else:
 
 			full_net_dic[key] = self.getNetClassListByDevice(key)
 			full_net_dic[key]['Name'] = val['Name']
 			
-
-		with open(raw_data_path + 'full_net_dic.json', 'w') as full_net_dic_file:
-			json.dump(full_net_dic,full_net_dic_file)
 		
 		return full_net_dic
 
-	def getFullBDOSProfConfigDictionary(self,key,val):
+	def getFullBDOSProfConfigDictionary(self,key,val,full_bdosprofconf_dic):
 		# Create Full BDOS Profile config list with all BDOS attributes dictionary per DefensePro
 
-		full_bdosprofconf_dic = {}
 		full_bdosprofconf_dic[key] = {}
 		full_bdosprofconf_dic[key]['Name'] = val['Name']
 		full_bdosprofconf_dic[key]['Version'] = val['Version']
 		full_bdosprofconf_dic[key]['Policies'] = self.getBDOSProfileConfigByDevice(key)
 
 
-		with open(raw_data_path + 'full_bdosprofconf_dic.json', 'w') as full_bdosprofconf_dic_file:
-			json.dump(full_bdosprofconf_dic,full_bdosprofconf_dic_file)
+
 
 		return full_bdosprofconf_dic
 
-	def getFullDNSProfConfigDictionary(self,key,val):
+	def getFullDNSProfConfigDictionary(self,key,val,full_dnsprofconf_dic):
 		# Create Full DNS Profile config list with all BDOS attributes dictionary per DefensePro
 
-		full_dnsprofconf_dic = {}
 		full_dnsprofconf_dic[key] = {}
 		full_dnsprofconf_dic[key]['Name'] = val['Name']
 		full_dnsprofconf_dic[key]['Version'] = val['Version']
 		full_dnsprofconf_dic[key]['Policies'] = self.getDNSProfileConfigByDevice(key)
 
-		with open(raw_data_path + 'full_dnsprofconf_dic.json', 'w') as full_dnsprofconf_dic_file:
-			json.dump(full_dnsprofconf_dic,full_dnsprofconf_dic_file)
+
 
 		return full_dnsprofconf_dic
 
 
 
-	def getFullSYNPConfigDictionary(self,dp_ip,val):
+	def getFullSYNPConfigDictionary(self,dp_ip,val,full_synprofconf_dic):
 		# Create Full SYNP Profile config list with all BDOS attributes dictionary per DefensePro
 
-		full_synpprofconf_dic = {}
-		full_synpprofconf_dic[dp_ip] = {}
-		full_synpprofconf_dic[dp_ip]['Name'] = val['Name']
-		full_synpprofconf_dic[dp_ip]['Version'] = val['Version']
+		full_synprofconf_dic[dp_ip] = {}
+		full_synprofconf_dic[dp_ip]['Name'] = val['Name']
+		full_synprofconf_dic[dp_ip]['Version'] = val['Version']
 
 		synp_prof_list = self.getSYNPProfileListByDevice(dp_ip)
 		synp_prof_params_table = self.getSYNPProfileParamsByDevice(dp_ip)
 		synp_protections_table = self.getSYNPProtectionsTableByDevice(dp_ip)
 
-		full_synpprofconf_dic[dp_ip]['Profiles'] = {}
+		full_synprofconf_dic[dp_ip]['Profiles'] = {}
 		
 		if synp_prof_params_table: #If table is not empty
 			for synp_prof_param_set in synp_prof_params_table['rsIDSSynProfilesParamsTable']:
-				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']] = {}
-				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Parameters'] = synp_prof_param_set
+				full_synprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']] = {}
+				full_synprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Parameters'] = synp_prof_param_set
 
 
-				full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'] = []
+				full_synprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'] = []
 
 				for synp_prof in synp_prof_list['rsIDSSynProfilesTable']:
 					if synp_prof['rsIDSSynProfilesName'] == synp_prof_param_set['rsIDSSynProfilesParamsName']:
 					
 						for syn_protection in synp_protections_table['rsIDSSYNAttackTable']:
 							if syn_protection['rsIDSSYNAttackName'] == synp_prof['rsIDSSynProfileServiceName']:
-								full_synpprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'].append(syn_protection)
+								full_synprofconf_dic[dp_ip]['Profiles'][synp_prof_param_set['rsIDSSynProfilesParamsName']]['Protections'].append(syn_protection)
 					
 
-		with open(raw_data_path + 'full_synprofconf_dic.json', 'w') as full_synpconf_dic_file:
-			json.dump(full_synpprofconf_dic,full_synpconf_dic_file)
-
-		return full_synpprofconf_dic
 
 
-	def getFullConnlimConfigDictionary(self,dp_ip,val):
+		return full_synprofconf_dic
+
+
+	def getFullConnlimConfigDictionary(self,dp_ip,val,full_connlimprofconf_dic):
 		# Create Full Connection Limit Profile config list with all BDOS attributes dictionary per DefensePronnectionLimitProfileName
 
-		full_connlimprofconf_dic = {}
 		full_connlimprofconf_dic[dp_ip] = {}
 		full_connlimprofconf_dic[dp_ip]['Name'] = val['Name']
 		full_connlimprofconf_dic[dp_ip]['Version'] = val['Version']
@@ -364,15 +347,13 @@ class Vision:
 						full_connlimprofconf_dic[dp_ip]['Profiles'][connlim_prof['rsIDSConnectionLimitProfileName']]['Protections'].append(connlim_protectionid)
 
 
-		with open(raw_data_path + 'full_connlimprofconf_dic.json', 'w') as full_connlimprofconf_file:
-			json.dump(full_connlimprofconf_dic,full_connlimprofconf_file)
+
 
 		return full_connlimprofconf_dic
 	
-	def getFullOOSConfigDictionary(self,dp_ip,val):
+	def getFullOOSConfigDictionary(self,dp_ip,val,full_oosprofconf_dic):
 		# Create Full Out of State Profile config list with all BDOS attributes dictionary per DefensePro
 
-		full_oosprofconf_dic = {}
 		full_oosprofconf_dic[dp_ip] = {}
 		full_oosprofconf_dic[dp_ip]['Name'] = val['Name']
 		full_oosprofconf_dic[dp_ip]['Version'] = val['Version']
@@ -389,7 +370,6 @@ class Vision:
 				full_oosprofconf_dic[dp_ip]['Profiles'].append(oos_prof)	
 
 
-		with open(raw_data_path + 'full_oosprofconf_dic.json', 'w') as full_oosprofconf_file:
-			json.dump(full_oosprofconf_dic,full_oosprofconf_file)
+
 
 		return full_oosprofconf_dic

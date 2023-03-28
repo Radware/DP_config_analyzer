@@ -113,6 +113,20 @@ V2.6
 	- Added writing device list to the raw json file
 	- Added run.sh (necessary if run from the container)
 
+4.1
+	3/28/23 
+	- Added cleanup of Raw_Data folder before script runs
+	- Bug fixes in config.py DP_IP_SCOPE_LIST
+	- Added new functionality - defining DP scope using customers.json file
+		!!! New mandatory variables added into config.py
+		add below line into "config.py"
+
+		CUSTOMERS_JSON = False # True - scope for the data collection will be defined from "customers.json" file, False - scope will be defined using config.py variable "DP_IP_SCOPE_LIST"
+
+		CUSTOMERS_JSON_CUST_ID_LIST = [] # List of customer IDs to collect data for, comma separated, example ['Customer A','Customer B']. If empty [] - collect data for all customers defined in customers.json file
+
+	- Optimized netClassDuplication() function to execute only if isDPAvailable() function is True
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
@@ -304,3 +318,5 @@ This file is being generated once the data collection is complete and it include
 
 ## Stage 3 – email alert
 By default, once the script finishes its operation, “dp_config.csv” report will be sent to the email address/es listed in ”config.py”.
+
+
