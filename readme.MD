@@ -249,6 +249,33 @@ VISION_IP = "1.1.1.1" # APSolute Vision IP
 VISION_USER = "user" # APSolute Vision username
 VISION_PASS = "password" # APSolute Vision password
 
+#################  Scope  #################
+
+Scope can be defined in one of two ways:
+
+#######- EITHER -#######
+
+1. Using the same format of the customers.json file from Monthly Report script- just place the file into the same directory.
+
+CUSTOMERS_JSON = True
+	True - scope for the data collection will be defined from "customers.json" file, 
+	False - scope will be defined using config.py variable "DP_IP_SCOPE_LIST"
+
+
+CUSTOMERS_JSON_CUST_ID_LIST = ['ICN-DMZ'] 
+
+	List of customer IDs to collect data for, comma separated, example ['Customer A','Customer B']. If empty [] - collect data for all customers defined in customers.json file
+
+######   --OR--  #######
+
+2. Manully defining the scope of DefensePro using "DP_IP_SCOPE_LIST" variable
+
+DP_IP_SCOPE_LIST = [] 
+	Example DP_IP_SCOPE_LIST = ['10.105.192.30','10.105.192.34'] 
+	This is list of DefensePro IP addresses to analyze, comma separated, example ['1.1.1.2','1.1.1.3']. if empty []- analyze all DefensePro in Vision
+	
+###########################################
+
 /# Script logging set up parameters 
 LOG_FILE_PATH = "./log/" # folder to save the script logging events
 LOG_ROTATION_SIZE = 20000000 # Maximum rotation log file size in Bytes after which it will be split to another file
