@@ -2,6 +2,11 @@ VISION_IP = "1.1.1.2" # APSolute Vision IP
 VISION_USER = "radware" # APSolute Vision username
 VISION_PASS = "radware" # APSolute Vision password
 
+VISION_VER = 4.85 # APSolute Vision version
+
+TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics
+DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
+
 ANALYZE_CONFIG = True # True - Analyze DefensePro configuration to /Reports/dpconfig_report.csv, False - don't analyze configuration 
 MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
 
@@ -18,6 +23,8 @@ DP_IP_SCOPE_LIST = ['10.105.192.30','10.105.192.34'] #['10.105.192.30','10.105.1
 
 REPORTS_PATH = "./Reports/" # Path to save reports
 CONFIG_PATH = "./Config/" # Path to save configuration
+RAW_DATA_PATH = "./Raw Data/" # Path to save raw data
+REQUESTS_PATH = "./Requests/" # Path to save requests payload
 
 # Log set up parameters
 LOG_FILE_PATH = "./log/" # folder to save the script logging events

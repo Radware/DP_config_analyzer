@@ -4,10 +4,11 @@ import json
 from logging_helper import logging
 import config as cfg
 import os
+import time
 
 raw_data_path = "./Raw Data/"
 config_path = "./Config/"
-
+requests_path = "./Requests/"
 
 class Vision:
 
@@ -16,13 +17,30 @@ class Vision:
 		self.login_data = {"username": username, "password": password}
 		self.base_url = "https://" + ip
 		self.sess = Session()
+		
 		self.sess.headers.update({"Content-Type": "application/json"})
 		self.login()
 		logging.info('Connecting to Vision')
 		print('Connecting to Vision')
-		self.device_list = self.getDeviceList()
+		self.vision_ver = cfg.VISION_VER
+		self.report_duration = self.epochTimeGenerator(cfg.DURATION)
+		self.time_now = int(time.time())*1000
+
 		logging.info('Collecting DefensePro device list')
 		print('Collecting DefensePro device list')		
+		self.device_list = self.getDeviceList()
+
+
+		with open(requests_path + 'BDOStrafficRequest.json') as outfile:
+			self.BDOSformatRequest = json.load(outfile)
+		with open(requests_path + 'DNStrafficRequest.json') as dnstrafficrequest:
+			self.DNSformatRequest = json.load(dnstrafficrequest)
+		with open(requests_path + 'TrafficRequest.json') as trafficrequest:
+			self.trafficformatrequest = json.load(trafficrequest)
+		with open(requests_path + 'TrafficRequestCPS.json') as trafficrequestCPS:
+			self.trafficformatrequestCPS = json.load(trafficrequestCPS)
+		with open(requests_path + 'TrafficRequestCEC.json') as trafficrequestcec:
+			self.trafficformatrequestcec = json.load(trafficrequestcec)
 
 	def login(self):
 
@@ -56,7 +74,10 @@ class Vision:
 
 		return dev_list
 
-
+	def epochTimeGenerator(self,days):
+		current_time = time.time()
+		daysInSeconds = 86400 * days
+		return (int(current_time) - daysInSeconds) * 1000
 	
 	def getSignatureProfileListByDevice(self, dp_ip):
 		# Returns Signature profile list with rules
@@ -216,10 +237,276 @@ class Vision:
 
 		return
 
+	def getBDOSTrafficReport(self,pol_dp_ip,pol_attr,net_list):
+
+		pol_name = pol_attr["rsIDSNewRulesName"]
+		pol_src_net = pol_attr["rsIDSNewRulesSource"]
+		pol_dst_net = pol_attr["rsIDSNewRulesDestination"]
+
+		if self.vision_ver < 4.83:
+			url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/BDOS_BASELINE_RATE_REPORTS' #pre 4.83 Vision
+		else:
+			url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/BDOS_BASELINE_RATE_HOURLY_REPORTS' #4.83 Vision
+
+		BDOS_portocols = ['udp','tcp-syn','tcp-syn-ack','tcp-rst','tcp-ack-fin','tcp-frag','udp-frag','icmp','igmp']
+
+		self.BDOSformatRequest['criteria'][5]['upper'] = self.time_now
+		self.BDOSformatRequest['criteria'][5]['lower'] = self.report_duration
+		self.BDOSformatRequest['criteria'][6]["filters"][0]['filters'][0]['value'] = pol_dp_ip
+		self.BDOSformatRequest['criteria'][6]["filters"][0]['filters'][1]["filters"][0]["value"] = pol_name 
+		self.BDOSformatRequest['criteria'][0]['value'] = 'true' # default IPv4 true
+		
+		
+		ipv6 = False
+		ipv4 = False
+		
+		bdosReportList = []
+		
+		for net_dp_ip, dp_attr in net_list.items():
+			if dp_attr == ([]):
+				#if unreachable do not perform other tests
+				continue
+			
+			if net_dp_ip == pol_dp_ip:
+
+				for netcl in dp_attr['rsBWMNetworkTable']: #for each netclass element
+					net_name = netcl['rsBWMNetworkName']
+					net_addr = netcl['rsBWMNetworkAddress']
+					
+					if net_name == pol_src_net and net_name != "any":
+						if ":" in net_addr:
+							ipv6 = True
+							#logging.info(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - src net is IPv6')  
+							# self.BDOSformatRequest['criteria'][0]['value'] = 'false'
+							
+						if "." in net_addr:
+							ipv4 = True
+							#logging.info(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - src net is IPv4')  
+							# self.BDOSformatRequest['criteria'][0]['value'] = 'true'			
+
+					if net_name == pol_dst_net and net_name != "any":
+						if ":" in net_addr:
+							ipv6 = True
+							#logging.info(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - dst net is IPv6')
+							# self.BDOSformatRequest['criteria'][0]['value'] = 'false'
+							
+						if "." in net_addr:
+							ipv4 = True
+							#logging.info(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - dst net is IPv4')  
+							# self.BDOSformatRequest['criteria'][0]['value'] = 'true'								
+						
+
+				
+		for protocol in BDOS_portocols:
+			self.BDOSformatRequest['criteria'][1]["value"] = protocol
+			
+			if ipv6:
+			
+				self.BDOSformatRequest['criteria'][0]['value'] = 'false'
+				r = self.sess.post(url = url, json = self.BDOSformatRequest , verify=False)
+				jsonData = json.loads(r.text)
+				
+				if jsonData['data'] == ([]): #Empty response
+					# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					empty_resp = [{'row': {'response': 'empty', 'protection': protocol}}]
+					# print(f'Printing empty resp ipv6 - {empty_resp}')
+					bdosReportList.append(empty_resp)
+
+					# print(f'{pol_dp_ip}, policy {pol_name} - executing IPv6 query')
+				else:
+					bdosReportList.append(jsonData['data'])
+
+			if ipv4:
+			
+				self.BDOSformatRequest['criteria'][0]['value'] = 'true'
+				r = self.sess.post(url = url, json = self.BDOSformatRequest , verify=False)
+				jsonData = json.loads(r.text)
+				
+				
+
+				if jsonData['data'] == ([]): #Empty response
+					# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					empty_resp = [{'row': {'response': 'empty', 'protection': protocol}}]
+					# print(f'Printing empty resp ipv6 - {empty_resp}')
+					bdosReportList.append(empty_resp)
+
+				# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					# print(f'{pol_dp_ip}, policy {pol_name} - executing IPv4 query')
+				else:
+					bdosReportList.append(jsonData['data'])
+
+		bdosTrafficReport = {pol_name:bdosReportList}
+		
+		return bdosTrafficReport
+
+	################DNS Query############################
+	def getDNStrafficReport(self,pol_dp_ip,pol_attr,net_list):
+
+		pol_name = pol_attr["rsIDSNewRulesName"]
+		pol_src_net = pol_attr["rsIDSNewRulesSource"]
+		pol_dst_net = pol_attr["rsIDSNewRulesDestination"]
+
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DNS_BASELINE_RATE_REPORTS'
+		
+		DNS_protocols = ['dns-a','dns-aaaa',"dns-mx","dns-text","dns-soa","dns-srv","dns-ptr","dns-naptr","dns-other"]
+
+		self.DNSformatRequest['criteria'][5]['upper'] = self.time_now
+		self.DNSformatRequest['criteria'][5]['lower'] = self.report_duration
+		self.DNSformatRequest['criteria'][6]["filters"][0]['filters'][0]['value'] = pol_dp_ip
+		self.DNSformatRequest['criteria'][6]["filters"][0]['filters'][1]["filters"][0]["value"] = pol_name 
+		
+		ipv6 = False
+		ipv4 = False
+		
+		dnsReportList = []
+
+		for net_dp_ip, dp_attr in net_list.items():
+			if dp_attr == ([]):
+				#if unreachable do not perform other tests
+				continue
+
+			if net_dp_ip == pol_dp_ip:
+
+				for netcl in dp_attr['rsBWMNetworkTable']: #for each netclass element
+					net_name = netcl['rsBWMNetworkName']
+					net_addr = netcl['rsBWMNetworkAddress']
+					
+					if net_name == pol_src_net and net_name != "any":
+						if ":" in net_addr:
+							ipv6 = True
+		
+						if "." in net_addr:
+							ipv4 = True		
+
+					if net_name == pol_dst_net and net_name != "any":
+						if ":" in net_addr:
+							ipv6 = True
+							
+						if "." in net_addr:
+							ipv4 = True							
+						
+		for protocol in DNS_protocols:
+
+			self.DNSformatRequest['criteria'][1]["value"] = protocol
+
+			if ipv6:
+						
+				self.DNSformatRequest['criteria'][0]['value'] = 'false'
+				r = self.sess.post(url = url, json = self.DNSformatRequest , verify=False)
+				jsonData = json.loads(r.text)
+				
+
+				if jsonData['data'] == ([]): #Empty response
+					# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					empty_resp = [{'row': {'response': 'empty', 'protection': protocol}}]
+					# print(f'Printing empty resp ipv6 - {empty_resp}')
+					dnsReportList.append(empty_resp)
+
+					# print(f'{pol_dp_ip}, policy {pol_name} - executing IPv6 query')
+				else:
+					dnsReportList.append(jsonData['data'])
+
+
+
+			if ipv4:
+
+				self.DNSformatRequest['criteria'][0]['value'] = 'true'
+				
+				r = self.sess.post(url = url, json = self.DNSformatRequest , verify=False)
+				jsonData = json.loads(r.text)
+				
+				# print(f'{pol_dp_ip}, policy {pol_name} - executing DNS IPv4 query')
+				
+				if jsonData['data'] == ([]): #Empty response
+					# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					empty_resp = [{'row': {'response': 'empty', 'protection': protocol}}]
+					# print(f'Printing empty resp ipv6 - {empty_resp}')
+					dnsReportList.append(empty_resp)
+
+				# print(f'{pol_dp_ip},{pol_name},{protocol},{jsonData}')
+					# print(f'{pol_dp_ip}, policy {pol_name} - executing IPv4 query')
+				else:
+					dnsReportList.append(jsonData['data'])
+
+		dnsTrafficReport = {pol_name:dnsReportList}
+		
+		return dnsTrafficReport
+
+################Traffic stats Bps######################
+
+	def getTrafficStatsBPS(self, dp_ip, policy):
+
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
+		
+		self.trafficformatrequest['aggregation']['criteria'][1]['value'] = 'bps'
+		self.trafficformatrequest['aggregation']['criteria'][3]['lower'] = self.report_duration
+		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
+		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
+
+		r = self.sess.post(url = url, json = self.trafficformatrequest , verify=False)
+		jsonData = json.loads(r.text)
 	
+		TrafficReportListBPS = {policy:jsonData['data']}
+		return TrafficReportListBPS
+
+############################################
+
+################Traffic stats PPS######################
+
+	def getTrafficStatsPPS(self, dp_ip, policy):
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
+		
+		self.trafficformatrequest['aggregation']['criteria'][1]['value'] = 'pps'
+		self.trafficformatrequest['aggregation']['criteria'][3]['lower'] = self.report_duration
+		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
+		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
+
+		r = self.sess.post(url = url, json = self.trafficformatrequest , verify=False)
+		jsonData = json.loads(r.text)
+	
+		TrafficReportListPPS = {policy:jsonData['data']}
+		return TrafficReportListPPS
+
+############################################
+
+################Traffic stats CPS######################
+
+	def getTrafficStatsCPS(self, dp_ip, policy):
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_CONNECTION_HOURLY_STATISTICS'
+		
+		self.trafficformatrequestCPS['aggregation']['criteria'][2]['lower'] = self.report_duration
+		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][0]['value'] = dp_ip
+		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
+
+		r = self.sess.post(url = url, json = self.trafficformatrequestCPS , verify=False)
+		jsonData = json.loads(r.text)
+	
+		trafficreportlistcps = {policy:jsonData['data']}
+
+		return trafficreportlistcps
+
+############################################
+
+################Traffic stats CEC - Concurrent Established Connections######################
+
+	def getTrafficStatsCEC(self, dp_ip):
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_CONCURRENT_CONNECTIONS_HOURLY_REPORTS'
+		
+		self.trafficformatrequestcec['aggregation']['criteria'][0]['lower'] = self.report_duration
+		self.trafficformatrequestcec['aggregation']['criteria'][1]['filters'][0]['filters'][0]['value'] = dp_ip
+
+		r = self.sess.post(url = url, json = self.trafficformatrequestcec , verify=False)
+		jsonData = json.loads(r.text)
+	
+		trafficreportlistcec = jsonData['data']
+
+		return trafficreportlistcec
+
+
+
+
 	def getFullPolicyDictionary(self,key,val,full_pol_dic):
 		# Create Full Policies list with attributes dictionary per DefensePro
-
 
 		full_pol_dic[key] = {}
 		full_pol_dic[key]['Name'] = val['Name']
@@ -373,3 +660,124 @@ class Vision:
 
 
 		return full_oosprofconf_dic
+	
+	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict):
+
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+			bdos_stats_dict[dp_ip] = {}
+			bdos_stats_dict[dp_ip]['Name'] = dp_attr['Name']
+			bdos_stats_dict[dp_ip]['BDOS Report'] = []
+
+			if not dp_attr['Policies']:
+				continue
+			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
+				if pol_attr["rsIDSNewRulesProfileNetflood"] != "" and pol_attr["rsIDSNewRulesProfileNetflood"] != "null" and pol_attr["rsIDSNewRulesName"] != "null" and pol_attr['rsIDSNewRulesState'] != "2":
+					bdos_report = self.getBDOSTrafficReport(dp_ip,pol_attr,full_net_dic)
+					bdos_stats_dict[dp_ip]['BDOS Report'].append(bdos_report)
+
+		return bdos_stats_dict
+
+
+	def getDNSReportFromVision(self,full_pol_dic,full_net_dic,dns_stats_dict):
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+			dns_stats_dict[dp_ip] = {}
+			dns_stats_dict[dp_ip]['Name'] = dp_attr['Name']
+			dns_stats_dict[dp_ip]['DNS Report'] = []
+
+			if not dp_attr['Policies']:
+				continue
+			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
+				if pol_attr["rsIDSNewRulesProfileDNS"] != "" and pol_attr["rsIDSNewRulesProfileDNS"] != "null" and pol_attr["rsIDSNewRulesName"] != "null" and pol_attr['rsIDSNewRulesState'] != "2":
+					dns_report = self.getDNStrafficReport(dp_ip,pol_attr,full_net_dic)
+					dns_stats_dict[dp_ip]['DNS Report'].append(dns_report)
+
+		return dns_stats_dict
+
+	def getTrafficUtilizationBPS(self,full_pol_dic,traffic_stats_dict_bps):
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+
+			traffic_stats_dict_bps[dp_ip] = {}
+			traffic_stats_dict_bps[dp_ip]['Name'] = dp_attr['Name']
+			traffic_stats_dict_bps[dp_ip]['Traffic Report BPS'] = []
+
+			if not dp_attr['Policies']:
+				continue
+
+			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
+				pol_name = pol_attr["rsIDSNewRulesName"]
+
+				traffic_report_bps = self.getTrafficStatsBPS(dp_ip,pol_name)
+				
+
+				traffic_stats_dict_bps[dp_ip]['Traffic Report BPS'].append(traffic_report_bps)
+				
+		
+		return traffic_stats_dict_bps
+	
+	def getTrafficUtilizationPPS(self,full_pol_dic,traffic_stats_dict_pps):
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+
+			traffic_stats_dict_pps[dp_ip] = {}
+			traffic_stats_dict_pps[dp_ip]['Name'] = dp_attr['Name']
+			traffic_stats_dict_pps[dp_ip]['Traffic Report PPS'] = []
+
+			if not dp_attr['Policies']:
+				continue
+
+			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
+				pol_name = pol_attr["rsIDSNewRulesName"]
+
+				traffic_report_pps = self.getTrafficStatsPPS(dp_ip,pol_name)
+				
+
+				traffic_stats_dict_pps[dp_ip]['Traffic Report PPS'].append(traffic_report_pps)
+				
+		
+		return traffic_stats_dict_pps
+
+	def getTrafficUtilizationCPS(self,full_pol_dic,traffic_stats_dict_cps):
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+
+			traffic_stats_dict_cps[dp_ip] = {}
+			traffic_stats_dict_cps[dp_ip]['Name'] = dp_attr['Name']
+			traffic_stats_dict_cps[dp_ip]['Traffic Report CPS'] = []
+
+			if not dp_attr['Policies']:
+				continue
+
+			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
+				pol_name = pol_attr["rsIDSNewRulesName"]
+
+				traffic_report_cps = self.getTrafficStatsCPS(dp_ip,pol_name)
+				
+
+				traffic_stats_dict_cps[dp_ip]['Traffic Report CPS'].append(traffic_report_cps)
+				
+		
+		return traffic_stats_dict_cps
+
+	def getCEC(self, full_pol_dic,traffic_stats_dict_cec):
+		#Get CEC - Concurrent Established Connections per DefensePro
+
+
+		for dp_ip,dp_attr in full_pol_dic.items():
+
+			traffic_stats_dict_cec[dp_ip] = {}
+			traffic_stats_dict_cec[dp_ip]['Name'] = dp_attr['Name']
+			traffic_stats_dict_cec[dp_ip]['Traffic Report CEC'] = []
+
+			if not dp_attr['Policies']:
+				continue
+
+		
+			traffic_report_cec = self.getTrafficStatsCEC(dp_ip)
+
+			traffic_stats_dict_cec[dp_ip]['Traffic Report CEC'].append(traffic_report_cec)
+
+
+		return traffic_stats_dict_cec

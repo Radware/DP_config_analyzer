@@ -127,6 +127,27 @@ V2.6
 
 	- Optimized netClassDuplication() function to execute only if isDPAvailable() function is True
 
+5.0 
+	4/5/2023
+	- Merged traffic stats collector script (https://github.com/Radware/DP_stats_collector) with this script (https://github.com/Radware/DP_config_analyzer)
+	- Added cleaning existing raw data, reports, dp configs before collecting the new data
+	- Optimized data collection code
+	- Directories paths optimization
+	- Added new config.py variables
+	
+		TRAFFIC_STATS
+			True- collect traffic stats collection and report generation configurable setting
+			False - do not collect traffic stats collection and report generation configurable setting
+	
+		ANALYZE_CONFIG
+			True - parse the data and generate "dpconfig_report.csv"
+			False - do not parse the data and generate "dpconfig_report.csv"
+
+
+		MAP_CONFIG
+			True - parse the data and generate "dpconfig_map.csv"
+			False - do not parse the data and generate "dpconfig_map.csv"
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
@@ -249,6 +270,12 @@ VISION_IP = "1.1.1.1" # APSolute Vision IP
 VISION_USER = "user" # APSolute Vision username
 VISION_PASS = "password" # APSolute Vision password
 
+VISION_VER = 4.85 # APSolute Vision version
+
+TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics and do not generate the traffic_stats.csv report
+
+DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
+
 #################  Scope  #################
 
 Scope can be defined in one of two ways:
@@ -312,6 +339,14 @@ This file includes all the instructions how to connect to the APSolute Vision an
 
 “dpconfig_parser.py” parses the collected data and writes deviations from the best practice into “dp_config.csv” final report. The checks are listed under the “Script output” section
 
+## dpconfig_mapper.py
+
+“dpconfig_mapper.py” parses the collected data and maps the most common policy settings, profiles into dpconfig_map.csv report
+
+## traffic_stats_parser.py
+
+"traffic_stats_parser.py" parses the collected traffic statistics data and statistics for traffic utilization max (CPS, PPS, BPS, CEC, BDOS baselines) into dp\.csv report
+
 
 # Script operation stages
 
@@ -347,3 +382,91 @@ This file is being generated once the data collection is complete and it include
 By default, once the script finishes its operation, “dp_config.csv” report will be sent to the email address/es listed in ”config.py”.
 
 
+################################################## DefensePro – traffic stats collector ################################################################################
+
+
+
+# Overview 
+
+The below functionality is now part of the config analyzer script
+
+The script purpose is to provide a report which includes DefensePro highest peak average traffic statistics for every policy CPS/PPS/BPS/CEC/BDOS/DNS (.\Reports\traffic_stats.csv folder).
+
+The script interacts with Radware APSolute Vision DefensePro and collects all the necessary data through REST API calls.
+
+## IMPORTANT
+● Read the entire file before attempting to configure/executing.
+
+
+# Script Output
+
+The script output includes  report in csv format:
+
+DefensePro Traffic statistics report (traffic_stats.csv)
+
+“traffic_stats.csv” report includes highest traffic utilization average for the configurable historical timeframe in days (default is 6 days) for every policy including the following stats
+CPS = Connections Per Second per policy per DefensePro
+PPS = Packets Per Second per policy per DefensePro
+BPS = Traffic utilization in Mbps per policy per DefensePro
+BDOS protected protocols and Normal baseline BPS per policy per DefensePro
+DNS protected record types and Normal baseline QPS per policy per DefensePro
+CEC = Concurrent established Connections per DefensePro All policies combined
+
+
+# Script operation stages
+
+## Stage 1- Data collection
+
+At stage 1, the data is collected for all registered DefensePro/policies and is written to intermediate files.
+
+Following files are mandatory in order to collect the BDOS/DNS baselines and traffic stats for low/high baselines detection.
+.\Requests\BDOStrafficRequest.json
+
+Defines the JSON payload for constructing BDOS data (traffic utilization and BDOS baselines) collection API calls.
+.\Raw Data\BDOS_traffic_report.json
+
+This file is being generated after the successful collection of all BDOS baselines and traffic stats for all registered DefensePro and policies. It includes all the traffic raw data and is used for the data parsing at the later stage. The data collection may take long time (~3 hours) and can generate large file of data ~300MB or more, depending on how large is the scale of the environment, how many DefensePro are registered to Vision and historical data collection setting ( DURATION in days under the config.py file).
+
+.\Requests\DNStrafficRequest.json
+
+Defines the JSON payload for constructing DNS data (DNS traffic and baselines) collection API calls.
+.\Raw Data\DNS_traffic_report.json
+
+This file is being generated after the successful collection of all DNS baselines and traffic stats for all registered DefensePro and policies. It includes all the traffic raw data and is used for the data parsing at the later stage. The data collection may take long time (~3 hours) and can generate large file of data ~300MB or more, depending on how large is the scale of the environment, how many DefensePro are registered to Vision and historical data collection setting ( DURATION in days under the config.py file).
+
+.\Raw Data\full_net_dic.json
+
+This file is being generated once the data collection is complete and it includes all the network classes profiles configuration data.
+
+## full_pol_dic.json
+
+“full_pol_dic.json” is generated once the data collection is complete, it stores all the information for all the policies for all the registered DefensePro’s in the APSolute Vision and is used for the further data parsing.
+
+
+Following files are required in order to construct the API calls to Vision to collect all the CPS/PPS/BPS/CEC traffic statistics
+
+## TrafficRequest.json
+
+This file is required in order to construct an API call to Vision to collect BPS (Bits Per Second) and PPS(Packets Per Second) data.
+
+## TrafficRequestCEC.json
+
+This file is required in order to construct an API call to Vision to collect CEC(Concurrent Established Connections) data.
+
+## TrafficRequestCPS.json
+
+This file is required in order to construct an API call to Vision to collect CPS(Connections Per Second) data.
+
+
+The files below are being generated once the traffic statistics data collection is complete. They include raw json data.
+Traffic_report_CEC.json
+Traffic_report_CPS.json
+Traffic_report_PPS.json
+Traffic_report_BPS.json
+
+
+# Stage 2- Data parsing
+
+## traffic_stats_parser.py
+
+traffic_stats_parser.py parses the collected traffic raw reports(Traffic_report_CEC.json,  Traffic_report_CPS.json, Traffic_report_PPS.json, Traffic_report_BPS.json, BDOS_traffic_report.json), calculates and presents the highest average traffic utilization statistics for all DefensePro and all policies in csv format (traffic_stats.csv) as an output
