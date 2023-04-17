@@ -163,7 +163,7 @@ def get_data_from_vision(key,val):
 
 
 
-def cleanup_report_files(reports_path):
+def cleanup_old_report_files(reports_path):
 	# This function will delete all report files except the last X files (X = cfg.REPORTS_TO_KEEP defined in config.py)
 
 	reports_to_keep = cfg.REPORTS_TO_KEEP
@@ -186,13 +186,10 @@ def dpconfig_cleanup():
 	for file in os.listdir(raw_data_path):
 		os.remove(raw_data_path + file)
 
-	cleanup_report_files(reports_path)
 
 
 
 if not getdatafromvision:
-
-	cleanup_report_files(reports_path)
 
 	with open(raw_data_path + 'full_pol_dic.json') as full_pol_dic_file:
 		full_pol_dic = json.load(full_pol_dic_file)
@@ -421,6 +418,10 @@ if cfg.TRAFFIC_STATS:
 
 if email:
 	logging_helper.send_report(report)
+
+
+cleanup_old_report_files(reports_path)
+
 
 full_cycle_time = time.time() - start_time
 delta_time = full_cycle_time - data_collection_time
