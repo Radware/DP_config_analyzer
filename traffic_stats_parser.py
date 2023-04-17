@@ -2,10 +2,43 @@ import json
 import csv
 import os
 import config as cfg
+import time
 
 reports_path = cfg.REPORTS_PATH
 raw_data_path = cfg.RAW_DATA_PATH
 requests_path = cfg.REQUESTS_PATH
+
+timenow = time.strftime('%Y%m%d-%H%M')
+
+# !
+###
+# read traffic stats.csv
+# write to column 9 bdos config
+
+# parseTrafficStatsBPS()
+# 	write to traffic_stats_temp1.csv
+
+# parseTrafficStatsPPS
+# 	read from traffic_stats_temp1.csv
+# 	write to traffic_stats_temp2.csv
+# 	write row[6]
+
+# ---> add new func for bdoc conf and write to row[7] between "Total traffic Max PPS Average" and "Total traffic Max CPS Average"
+# 	read from temp2
+# 	write to temp3
+
+# parseTrafficStatsCPS():
+# 	read from traffic_stats_temp2.csv --> change to temp3
+# 	write to 'traffic_stats.csv'
+
+# parseTrafficStatsCEC():
+# 	'traffic_stats.csv'
+# parseBDOSStats():
+# 	'traffic_stats.csv'
+# parseDNSStats():
+# 	traffic_stats.csv'
+
+###
 
 
 def parseTrafficStatsBPS():
@@ -146,7 +179,7 @@ def parseTrafficStatsCPS():
 
 					# Traffic Utilization Stats collection - max traffic average per policy
 
-					with open(reports_path + 'traffic_stats_temp2.csv', 'r') as read_obj, open(reports_path + 'traffic_stats.csv', 'a', newline='') as write_obj:
+					with open(reports_path + 'traffic_stats_temp2.csv', 'r') as read_obj, open(reports_path + f'traffic_stats_{timenow}.csv', 'a', newline='') as write_obj:
 					# Create a csv.reader object from the input file object
 						csv_reader = csv.reader(read_obj)
 
@@ -198,7 +231,7 @@ def parseTrafficStatsCEC():
 
 
 				# Traffic Utilization Stats collection - max traffic average per policy
-				with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+				with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 					traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 					traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'All Policies', f'All Combined' , f'N/A','N/A','N/A', 'N/A',f'{top_currcps_avg}'])
 
@@ -227,7 +260,7 @@ def parseBDOSStats():
 							if row['response'] == 'empty':
 								# print(f'{dp_ip},{dp_name},{policy},' , row['protection'] ,' - no BDOS stats ---')
 								empty_resp = True
-								with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+								with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 									traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 									traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', row['protection'] , f'No BDOS stats', f'No BDOS stats' , 'N/A','N/A','N/A'])
 
@@ -262,25 +295,25 @@ def parseBDOSStats():
 						
 						# BDOS Stats collection - max traffic average and normal baseline
 						if row['normal'] is not None:
-							with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+							with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 								traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', f'{protoc}' , f'{top10_currthroughput_avg / 1000}', f'{float(normal_baseline) /1000}' , 'N/A','N/A','N/A'])
 
 						if row['normal'] is None:
-							with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+							with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 								traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', f'{protoc}' , f'{top10_currthroughput_avg / 1000}', f'None' , 'N/A','N/A','N/A'])
 
 					if len(currthroughput_list) and sum(currthroughput_list) ==0:
 						if row['normal'] is not None:
-							with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+							with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 								traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', f'{protoc}' , f'0', f'{float(normal_baseline) /1000}' , 'N/A','N/A','N/A'])
 
 
 
 					if len(currthroughput_list) == 0 and not empty_resp:
-							with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+							with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 								traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', row['protection'] , f'BDOS stats returned None', f'Normal BDOS baseline returned None' , 'N/A','N/A','N/A'])
 
@@ -306,7 +339,7 @@ def parseDNSStats():
 							if row['response'] == 'empty':
 								print(f'{dp_ip},{dp_name},{policy},' , row['protection'] ,' - no DNS stats ---')
 								empty_resp = True
-								with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+								with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 									traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 									traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', row['protection'] , f'No DNS stats', f'No DNS stats' , 'N/A','N/A','N/A'])
 
@@ -338,18 +371,18 @@ def parseDNSStats():
 
 						
 						# DNS Stats collection - max traffic average and normal baseline
-						with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+						with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 							traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 							traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', f'{protoc}' , f'{top10_currthroughput_avg}', f'{float(normal_baseline)}' , 'N/A','N/A','N/A'])
 
 
 					if len(currthroughput_list) and sum(currthroughput_list) ==0: 
-						with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+						with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 							traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 							traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', f'{protoc}' , f'0', f'{float(normal_baseline)}' , 'N/A','N/A','N/A'])
 
 					if len(currthroughput_list) == 0 and not empty_resp:
-							with open(reports_path + 'traffic_stats.csv', mode='a', newline="") as traffic_stats:
+							with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 								traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', row['protection'] , f'DNS stats returned None', f'Normal DNS baseline returned None' , 'N/A','N/A','N/A'])
 
@@ -357,7 +390,7 @@ def parseDNSStats():
 
 def parse():
 
-	with open(reports_path + 'traffic_stats.csv', mode='w', newline="") as traffic_stats:
+	with open(reports_path + f'traffic_stats_{timenow}.csv', mode='w', newline="") as traffic_stats:
 		traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 		traffic_stats.writerow([f'DefensePro IP' , f'DefensePro Name', f'Policy' , f'Protocol', f'Total traffic Max Throughput Average(Mbps/DNS QPS)', f'BDOS Normal Baseline(Mbps/DNS QPS)', f'Total traffic Max PPS Average', f'Total traffic Max CPS Average' , f'Total traffic Max Concurrent Established Average'])
 

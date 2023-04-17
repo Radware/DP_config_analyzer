@@ -148,6 +148,13 @@ V2.6
 			True - parse the data and generate "dpconfig_map.csv"
 			False - do not parse the data and generate "dpconfig_map.csv"
 
+5.1
+	4/6/2023 
+	-	get_data_from_vision function code optimization, 
+	-	added measuring time it takes for the script to complete
+	4/17/2023
+	-	Added keeping old reports (configurable )
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
@@ -275,6 +282,11 @@ VISION_VER = 4.85 # APSolute Vision version
 TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics and do not generate the traffic_stats.csv report
 
 DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
+
+###########################################
+REPORTS_TO_KEEP = 3 # Number of reports to keep in the Reports folder
+###########################################
+
 
 #################  Scope  #################
 

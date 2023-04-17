@@ -1,6 +1,7 @@
 import config as cfg
 import csv
 import logging_helper
+import time
 
 
 reports_path = cfg.REPORTS_PATH
@@ -16,8 +17,10 @@ class DataMapper():
 		self.full_connlimprofconf_dic = full_connlimprofconf_dic
 		self.full_oosprofconf_dic = full_oosprofconf_dic
 		self.na_list = ['']
+		self.timenow = time.strftime('%Y%m%d-%H%M')
 
-		with open(reports_path + 'dpconfig_map.csv', mode='w', newline="") as dpconfigmap_report:
+
+		with open(reports_path + f'dpconfig_map_{self.timenow}.csv', mode='w', newline="") as dpconfigmap_report:
 			dp_configmap_writer = csv.writer(dpconfigmap_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 			dp_configmap_writer.writerow(['DefensePro Name' , 'DefensePro IP' ,	'DefensePro Version' , 'Policy Name','Policy State','Policy Block/Report', 'Policy Packet Reporting',\
 				 'SRC Network Profile Name','SRC Network Addresses','DST Network Profile Name','DST Network Addresses',\
@@ -32,6 +35,8 @@ class DataMapper():
 										'DNS Naptr Quota','DNS SRV Status','DNS SRV Quota','DNS Other Status','DNS Other Quota','DNS Packet Reporting',\
 											'DNS Learning Suppression','DNS Footprint Strictness'])
 
+
+	
 	def isDPAvailable(self, dp_ip,dp_attr):
 		# DP is considerd unavailable if DP is unreachable or no policy exists
 
@@ -744,7 +749,7 @@ class DataMapper():
 
 
 
-		with open(reports_path + 'dpconfig_map.csv', mode='a', newline="") as dpconfigmap_report:
+		with open(reports_path + f'dpconfig_map_{self.timenow}.csv', mode='a', newline="") as dpconfigmap_report:
 			dp_configmap_writer = csv.writer(dpconfigmap_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 			dp_configmap_writer.writerow(policy_settings)
 

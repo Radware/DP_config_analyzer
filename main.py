@@ -8,6 +8,12 @@ import urllib3
 import logging_helper
 import sys
 import os
+import time
+import glob
+
+start_time = time.time()
+
+
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -73,7 +79,23 @@ for i in sys.argv:
 		nodpconfigparsing = True
 
 
-def get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic,full_oosprofconf_dic,bdos_stats_dict,dns_stats_dict,traffic_stats_dict_bps,traffic_stats_dict_pps,traffic_stats_dict_cps,traffic_stats_dict_cec):
+def get_data_from_vision(key,val):
+
+	global full_pol_dic
+	global full_net_dic
+	global full_sig_dic
+	global full_bdosprofconf_dic
+	global full_dnsprofconf_dic
+	global full_synprofconf_dic
+	global full_connlimprofconf_dic
+	global full_oosprofconf_dic
+	global bdos_stats_dict
+	global dns_stats_dict
+	global traffic_stats_dict_bps
+	global traffic_stats_dict_pps
+	global traffic_stats_dict_cps
+	global traffic_stats_dict_cec
+
 
 	print(f'Collecting policies data from Defensepro {key}')
 	logging_helper.logging.info(f'Collecting policies data from Defensepro {key}')
@@ -132,23 +154,6 @@ def get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdo
 		logging_helper.logging.info(f'Collecting Traffic Utilization data (CEC) from Defensepro {key}')
 		traffic_stats_dict_cec = v.getCEC(full_pol_dic,traffic_stats_dict_cec)
 
-		with open(raw_data_path + 'BDOS_traffic_report.json', 'w') as outfile:
-			json.dump(bdos_stats_dict,outfile)
-
-		with open(raw_data_path + 'DNS_traffic_report.json', 'w') as outfile:
-			json.dump(dns_stats_dict,outfile)
-
-		with open(raw_data_path + 'Traffic_report_BPS.json', 'w') as outfile:
-			json.dump(traffic_stats_dict_bps,outfile)
-
-		with open(raw_data_path + 'Traffic_report_PPS.json', 'w') as outfile:
-			json.dump(traffic_stats_dict_pps,outfile)
-
-		with open(raw_data_path + 'Traffic_report_CPS.json', 'w') as outfile:
-			json.dump(traffic_stats_dict_cps,outfile)
-
-		with open(raw_data_path + 'Traffic_report_CEC.json', 'w') as outfile:
-			json.dump(traffic_stats_dict_cec,outfile)
 
 	print(f'Downloading configuration file from Defensepro {key}')
 	logging_helper.logging.info(f'Downloading configuration file from Defensepro {key}')
@@ -157,47 +162,37 @@ def get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdo
 	print('-' * 25)
 
 
-	with open(raw_data_path + 'full_pol_dic.json', 'w') as full_pol_dic_file:
-		json.dump(full_pol_dic,full_pol_dic_file)
 
-	with open(raw_data_path + 'full_net_dic.json', 'w') as full_net_dic_file:
-		json.dump(full_net_dic,full_net_dic_file)
+def cleanup_report_files(reports_path):
+	# This function will delete all report files except the last X files (X = cfg.REPORTS_TO_KEEP defined in config.py)
 
-	with open(raw_data_path + 'full_sig_dic.json', 'w') as full_sig_dic_file:
-		json.dump(full_sig_dic,full_sig_dic_file)
+	reports_to_keep = cfg.REPORTS_TO_KEEP
+	prefix_list = ['dpconfig_report_','dpconfig_map_','traffic_stats_']
 
-	with open(raw_data_path + 'full_bdosprofconf_dic.json', 'w') as full_bdosprofconf_dic_file:
-		json.dump(full_bdosprofconf_dic,full_bdosprofconf_dic_file)
+	for prefix in prefix_list:
+		files = glob.glob(reports_path + prefix + '*.csv')
+		files.sort(key=os.path.getmtime)
 
-	with open(raw_data_path + 'full_dnsprofconf_dic.json', 'w') as full_dnsprofconf_dic_file:
-		json.dump(full_dnsprofconf_dic,full_dnsprofconf_dic_file)
-
-	with open(raw_data_path + 'full_synprofconf_dic.json', 'w') as full_synpconf_dic_file:
-		json.dump(full_synprofconf_dic,full_synpconf_dic_file)
-
-	with open(raw_data_path + 'full_connlimprofconf_dic.json', 'w') as full_connlimprofconf_file:
-		json.dump(full_connlimprofconf_dic,full_connlimprofconf_file)
-
-	with open(raw_data_path + 'full_oosprofconf_dic.json', 'w') as full_oosprofconf_file:
-		json.dump(full_oosprofconf_dic,full_oosprofconf_file)
-
-
-
+		for file in files[:-reports_to_keep]:
+			os.remove(file)
 
 
 
 def dpconfig_cleanup():
-	# For every file  in config_path and Raw_Data, delete it
+
 	for file in os.listdir(config_path):
 		os.remove(config_path + file)
 
 	for file in os.listdir(raw_data_path):
 		os.remove(raw_data_path + file)
 
-	for file in os.listdir(reports_path):
-		os.remove(reports_path + file)
+	cleanup_report_files(reports_path)
+
+
 
 if not getdatafromvision:
+
+	cleanup_report_files(reports_path)
 
 	with open(raw_data_path + 'full_pol_dic.json') as full_pol_dic_file:
 		full_pol_dic = json.load(full_pol_dic_file)
@@ -305,7 +300,7 @@ else: #getdatafromvision = True - collect data from vision
 						for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 							if key in dp_list:
 								
-								get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic,full_oosprofconf_dic,bdos_stats_dict,dns_stats_dict,traffic_stats_dict_bps,traffic_stats_dict_pps,traffic_stats_dict_cps,traffic_stats_dict_cec)
+								get_data_from_vision(key,val)
 
 
 				else: #If CUSTOMERS_JSON_CUST_ID_LIST is not empty, collect only the customers defined in the list	
@@ -323,7 +318,7 @@ else: #getdatafromvision = True - collect data from vision
 							for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 								if key in dp_list:
 
-									get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic,full_oosprofconf_dic,bdos_stats_dict,dns_stats_dict,traffic_stats_dict_bps,traffic_stats_dict_pps,traffic_stats_dict_cps,traffic_stats_dict_cec)
+									get_data_from_vision(key,val)
 
 	else: #If customers.json is set to false, use the scope defined in config.py variable "DP_IP_SCOPE_LIST"
 		print('CUSTOMERS_JSON is set to False - collecting data using the scope from DP_IP_SCOPE_LIST')
@@ -336,7 +331,7 @@ else: #getdatafromvision = True - collect data from vision
 
 			for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 
-				get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic,full_oosprofconf_dic,bdos_stats_dict,dns_stats_dict,traffic_stats_dict_bps,traffic_stats_dict_pps,traffic_stats_dict_cps,traffic_stats_dict_cec)
+				get_data_from_vision(key,val)
 			
 
 		else: #If DP_IP_SCOPE_LIST is defined (not empty), collect all policies for the DefensePro in the list
@@ -347,13 +342,56 @@ else: #getdatafromvision = True - collect data from vision
 
 				if key in cfg.DP_IP_SCOPE_LIST:	
 
-					get_data_from_vision(key,val,full_pol_dic,full_net_dic,full_sig_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic,full_oosprofconf_dic,bdos_stats_dict,dns_stats_dict,traffic_stats_dict_bps,traffic_stats_dict_pps,traffic_stats_dict_cps,traffic_stats_dict_cec)
+					get_data_from_vision(key,val)
 
 				else:
 					print(f'Skipping data collection for Defensepro {key} - {val["Name"]}. Not in DP_IP_SCOPE_LIST')
 					print('-' * 25)
 
 
+	with open(raw_data_path + 'full_pol_dic.json', 'w') as full_pol_dic_file:
+		json.dump(full_pol_dic,full_pol_dic_file)
+
+	with open(raw_data_path + 'full_net_dic.json', 'w') as full_net_dic_file:
+		json.dump(full_net_dic,full_net_dic_file)
+
+	with open(raw_data_path + 'full_sig_dic.json', 'w') as full_sig_dic_file:
+		json.dump(full_sig_dic,full_sig_dic_file)
+
+	with open(raw_data_path + 'full_bdosprofconf_dic.json', 'w') as full_bdosprofconf_dic_file:
+		json.dump(full_bdosprofconf_dic,full_bdosprofconf_dic_file)
+
+	with open(raw_data_path + 'full_dnsprofconf_dic.json', 'w') as full_dnsprofconf_dic_file:
+		json.dump(full_dnsprofconf_dic,full_dnsprofconf_dic_file)
+
+	with open(raw_data_path + 'full_synprofconf_dic.json', 'w') as full_synpconf_dic_file:
+		json.dump(full_synprofconf_dic,full_synpconf_dic_file)
+
+	with open(raw_data_path + 'full_connlimprofconf_dic.json', 'w') as full_connlimprofconf_file:
+		json.dump(full_connlimprofconf_dic,full_connlimprofconf_file)
+
+	with open(raw_data_path + 'full_oosprofconf_dic.json', 'w') as full_oosprofconf_file:
+		json.dump(full_oosprofconf_dic,full_oosprofconf_file)
+
+	if cfg.TRAFFIC_STATS:
+
+		with open(raw_data_path + 'BDOS_traffic_report.json', 'w') as outfile:
+			json.dump(bdos_stats_dict,outfile)
+
+		with open(raw_data_path + 'DNS_traffic_report.json', 'w') as outfile:
+			json.dump(dns_stats_dict,outfile)
+
+		with open(raw_data_path + 'Traffic_report_BPS.json', 'w') as outfile:
+			json.dump(traffic_stats_dict_bps,outfile)
+
+		with open(raw_data_path + 'Traffic_report_PPS.json', 'w') as outfile:
+			json.dump(traffic_stats_dict_pps,outfile)
+
+		with open(raw_data_path + 'Traffic_report_CPS.json', 'w') as outfile:
+			json.dump(traffic_stats_dict_cps,outfile)
+
+		with open(raw_data_path + 'Traffic_report_CEC.json', 'w') as outfile:
+			json.dump(traffic_stats_dict_cec,outfile)
 
 
 	print('Data collection is complete')
@@ -361,8 +399,13 @@ else: #getdatafromvision = True - collect data from vision
 	logging_helper.logging.info('Data collection is complete')
 
 
+data_collection_time = time.time() - start_time
+
+
 print('Starting data parsing')
 logging_helper.logging.info('Starting data parsing')
+
+
 
 if cfg.ANALYZE_CONFIG and not test_email_alarm:
 	print('Starting config analysis')
@@ -378,3 +421,12 @@ if cfg.TRAFFIC_STATS:
 
 if email:
 	logging_helper.send_report(report)
+
+full_cycle_time = time.time() - start_time
+delta_time = full_cycle_time - data_collection_time
+
+print(f"--- Data collection {data_collection_time} seconds ---")
+
+print(f"--- Data parsing only {delta_time} seconds ---")
+
+print(f"--- Full cycle {full_cycle_time} seconds. ---")
