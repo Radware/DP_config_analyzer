@@ -8,7 +8,7 @@ reports_path = cfg.REPORTS_PATH
 config_path = cfg.CONFIG_PATH
 
 class DataParser():
-	def __init__(self, full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic):
+	def __init__(self, full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic, full_sig_db_dic):
 		# with open('ful_pol_dic.txt') as fp:
 		# 	self.full_pol_dic = fp.read()
 		self.full_pol_dic = full_pol_dic
@@ -16,17 +16,16 @@ class DataParser():
 		self.full_net_dic = full_net_dic
 		self.full_bdosprofconf_dic = full_bdosprofconf_dic
 		self.full_synprofconf_dic = full_synprofconf_dic
+		self.full_sig_db_dic = full_sig_db_dic
 		self.parseDict = {}
 		self.timenow = time.strftime('%Y%m%d-%H%M')
 
 		with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='w', newline="") as dpconfig_report:
 				bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 				bdos_writer.writerow(['DefensePro Name' , 'DefensePro IP' ,	'Policy' , 'Recommendation'])
-	
 
 
 	def run(self):
-
 		for dp_ip,dp_attr in self.full_pol_dic.items():
 			dp_name = dp_attr['Name']
 			self.initParser(dp_ip)
@@ -198,6 +197,7 @@ class DataParser():
 				self.v7CountInstance(dp_name, dp_ip, dp_attr['Policies']['rsIDSNewRulesTable'])
 
 			self.parseDPConfig(dp_ip, dp_name) #Perform DP config files checks
+			self.parseDPSignatureDB(dp_ip, dp_name, self.full_sig_db_dic) #Check if DP has the latest signature DB
 
 		if self.isDPAvailable(dp_ip, dp_attr):
 			self.netClassDuplication(self.full_net_dic, self.full_pol_dic) #Check if network class is unused, shared, duplicate or subnet of another class
@@ -240,7 +240,66 @@ class DataParser():
 			return False
 
 		return True
-	
+
+
+	def parseDPSignatureDB(self,dp_ip, dp_name, full_sig_db_dic):
+		# CHeck if DP has the latest signature DB
+		for sig_dp_ip, sig_dp_attr in full_sig_db_dic.items():
+			if sig_dp_ip == dp_ip:
+				current_sig_db = sig_dp_attr['CurrentSignatureFileVersion']
+				latest_sig_db = sig_dp_attr['LatestSignatureFileVersion']
+				dp_base_mac = sig_dp_attr['BaseMACAddress']
+
+				# normalize and parse latest signature db
+				latest_sig_db = latest_sig_db[2:]
+
+
+				#if latest_sig_db startswith "<!DOCTYPE html>\\n<html lang="en">\\n     <head>\\n          <title>ShieldSquare Block</title>\\n"
+				if latest_sig_db.startswith("<!DOCTYPE html>\\n<html lang="):
+					# print("Request blocked by Radware BOTM")
+					latest_sig_db = f'Current Signature DB is "{current_sig_db}". Could not fetch the latest signature db since request has been blocked by Radware BOTM'
+
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , latest_sig_db])
+
+				elif latest_sig_db.startswith("Error Code = 2|Error Message = Mac is not authorized"):
+					
+					latest_sig_db = f'Mac "{dp_base_mac}" is not authorized for Signature update. Current Signature DB is "{current_sig_db}". Please contact Radware Support'
+
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , latest_sig_db])
+
+				
+				elif latest_sig_db.startswith("0") and "." in latest_sig_db:
+					# print("Latest Signature DB is: " + latest_sig_db)
+
+					latest_sig_db = latest_sig_db.split('@')[0]
+					latest_sig_db_int = latest_sig_db.split('.')[1]
+
+					current_sig_db_int = current_sig_db.split('.')[1]
+
+					delta_sig_db = int(latest_sig_db_int) - int(current_sig_db_int)
+					if delta_sig_db > cfg.SIG_DB_DELTA:
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+								csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+								csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Signature database is outdated. Current Signature DB is "{current_sig_db}". Latest Signature DB is "{latest_sig_db}". Please update the Signature DB.'])
+				
+				
+				elif latest_sig_db.startswith(" Connectivity"): # no connectivity to www.radware.com
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+								csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+								csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Could not reach www.radware.com to fetch the lates signature database. Current Signature DB is "{current_sig_db}". Please check the connectivity to www.radware.com.'])
+			
+				else:
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Unknown error getting latest signature db. Current signature db is {current_sig_db}'])
+
+
+
+
 	def getDPVersion(self, dp_version):
 		#Get DP Version
 		return int(dp_version.split('.')[0])

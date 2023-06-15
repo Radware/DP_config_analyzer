@@ -5,6 +5,7 @@ from logging_helper import logging
 import config as cfg
 import os
 import time
+import random
 
 raw_data_path = "./Raw Data/"
 config_path = "./Config/"
@@ -25,6 +26,7 @@ class Vision:
 		self.vision_ver = cfg.VISION_VER
 		self.report_duration = self.epochTimeGenerator(cfg.DURATION)
 		self.time_now = int(time.time())*1000
+		self.internet_connectivity = self.InternetConnectivity()
 
 		logging.info('Collecting DefensePro device list')
 		print('Collecting DefensePro device list')		
@@ -60,6 +62,26 @@ class Vision:
 			logging.info('Vision Login error: ' + response['message'])
 			exit(1)
 
+	def InternetConnectivity(self):
+		# Check if there is internet access
+
+		url = 'https://www.radware.com'
+
+		try:
+			response = requests.request(method='GET', url=url)
+
+			if response.status_code == 200:
+				print('Internet connection is available.')
+				return True
+			
+			else:
+				print('Healtcheck response is not 200 OK')
+				return False
+			
+		except:
+			print("No internet connection")
+			return False
+		
 	def getDeviceList(self):
 		# Returns list of DP with mgmt IP, type, Name
 		devices_url = self.base_url + '/mgmt/system/config/itemlist/alldevices'
@@ -236,6 +258,41 @@ class Vision:
 			f.write(r.content) #Write to file
 
 		return
+	
+
+	def getMonitorInfo(self,dp_ip):
+
+		# Downloads DefensePro monitor info
+		policy_url = self.base_url + "/mgmt/device/byip/" + \
+			dp_ip + "/monitor?prop=rsPlatformIdentifier,rsWSDSysUpTime,rsWSDSysBaseMACAddress,rsIDSAttackDBVersion,rndManagedTime,rndManagedDate,rndBrgVersion,rdwrDPBuildID,rsWSDVersionStatus,rdwrDeviceThroughput,rsWSDDRAMSize,rsCoresNumber,rsCPUFrequency"
+
+		r = self.sess.get(url=policy_url, verify=False)
+		monitor_info = r.json()
+
+		return monitor_info
+
+
+		
+	def getLatestSigDB(self,dp_base_mac):
+
+		# Downloads DefensePro monitor info
+		url = "https://www.radware.com/modules/radware/packages/mis/autoattackupdate/FIRST.asp?protocol=2&pass=" + dp_base_mac
+		# add header User-Agent and Accept-Encoding to avoid 403 error
+		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.' + str(random.randint(1, 1000)) + '.0.0 Safari/537.36'}
+		try:
+			r = self.sess.get(url, verify=False,headers=headers)
+			r.raise_for_status()
+
+			latest_sig_db = r.content
+
+		except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError,requests.exceptions.SSLError,requests.exceptions.Timeout,requests.exceptions.ConnectTimeout,requests.exceptions.ReadTimeout) as err:	
+			logging.info(str(err))
+			print(str(err))
+			latest_sig_db = "No Connectivity"
+			# raise SystemExit(err)
+			
+
+		return latest_sig_db
 
 	def getBDOSTrafficReport(self,pol_dp_ip,pol_attr,net_list):
 
@@ -660,6 +717,32 @@ class Vision:
 
 
 		return full_oosprofconf_dic
+	
+
+	def getFullSigDB(self,dp_ip,val,full_sig_db_dic):
+		# Create Full Out of State Profile config list with all BDOS attributes dictionary per DefensePro
+		full_sig_db_dic[dp_ip] = {}
+		full_sig_db_dic[dp_ip]['Name'] = val['Name']
+		full_sig_db_dic[dp_ip]['Version'] = val['Version']
+
+		dp_monitor_json = self.getMonitorInfo(dp_ip)
+
+		dp_base_mac = dp_monitor_json['rsWSDSysBaseMACAddress']
+		dp_base_mac_normalized = dp_base_mac.replace(":","") #remove : from mac address
+
+		full_sig_db_dic[dp_ip]['BaseMACAddress'] = dp_base_mac
+
+		full_sig_db_dic[dp_ip]['CurrentSignatureFileVersion'] = dp_monitor_json['rsIDSAttackDBVersion']
+		
+		if self.internet_connectivity:
+			latest_sig_db = self.getLatestSigDB(dp_base_mac_normalized)
+			latest_sig_db = str(latest_sig_db)
+		else:
+			latest_sig_db = "No Connectivity"
+
+		full_sig_db_dic[dp_ip]['LatestSignatureFileVersion'] = latest_sig_db
+		
+		return full_sig_db_dic
 	
 	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict):
 

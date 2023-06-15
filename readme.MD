@@ -155,6 +155,14 @@ V2.6
 	4/17/2023
 	-	Added keeping old reports (configurable )
 
+5.2
+	4/27/2023
+	-	added writing configured bdos bandwidth to traffic_stats report
+
+5.3
+	6/15/2023
+	-	added checking for the outdated signatures
+	
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
