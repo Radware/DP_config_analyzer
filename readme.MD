@@ -162,6 +162,9 @@ V2.6
 5.3
 	6/15/2023
 	-	added checking for the outdated signatures
+		!! config.py update is required - added new variable below:
+			SIG_DB_DELTA = 2 # Signature DB Delta from the latest release to the current release in weeks
+
 	
 # Functionality to be added:
 
