@@ -44,6 +44,8 @@ BDOS_LST = 50 # BDOS Learning Suppression in %
 BDOS_BW_IN = 100000 # BDOS Inbound Traffic Bandwidth setting in Kbps
 BDOS_BW_OUT = 100000 # BDOS Outbound Traffic Bandwidth setting in Kbps
 SIG_SMPL_RATE = 503
+SIG_DB_DELTA = 2 # Signature DB Delta from the latest release to the current release in weeks
+
 
 # Email set up parameters for sending email with reports
 SMTP_AUTH = True
