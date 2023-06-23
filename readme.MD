@@ -165,7 +165,24 @@ V2.6
 		!! config.py update is required - added new variable below:
 			SIG_DB_DELTA = 2 # Signature DB Delta from the latest release to the current release in weeks
 
-	
+5.4
+	6/23/2023
+	-	Added sending requests through Proxy option
+				!! config.py update is required (see config.py example) - added new proxy variables below:
+				
+				################# Proxy settings #################
+
+				PROXY = False # True - use proxy server, False - don't use proxy server
+
+				PROXY_HTTP = "proxy-radware.com"
+				PROXY_HTTP_PORT = 80
+
+				PROXY_HTTPS = "proxy-radware.com"
+				PROXY_HTTPS_PORT = 443
+
+				PROXY_USER = "radware"
+				PROXY_PASS = "radware"
+					
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

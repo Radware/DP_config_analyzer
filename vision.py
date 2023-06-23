@@ -68,8 +68,17 @@ class Vision:
 		url = 'https://www.radware.com'
 
 		try:
-			response = requests.request(method='GET', url=url)
 
+			if cfg.PROXY:
+				proxy = {
+				'http': cfg.PROXY_HTTP + ':' + str(cfg.PROXY_HTTP_PORT),
+				'https': cfg.PROXY_HTTPS + ':' + str(cfg.PROXY_HTTPS_PORT),
+	}
+				response = requests.request(method='GET', url=url, proxies=proxy, verify=False)
+			else:
+				response = requests.request(method='GET', url=url, verify=False)
+
+				
 			if response.status_code == 200:
 				print('Internet connection is available.')
 				return True

@@ -8,7 +8,20 @@ TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePr
 DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
 
 ANALYZE_CONFIG = True # True - Analyze DefensePro configuration to /Reports/dpconfig_report.csv, False - don't analyze configuration 
-MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
+MAP_CONFIG = False # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
+
+################# Proxy settings #################
+
+PROXY = False # True - use proxy server, False - don't use proxy server
+
+PROXY_HTTP = "proxy-radware.com"
+PROXY_HTTP_PORT = 80
+
+PROXY_HTTPS = "proxy-radware.com"
+PROXY_HTTPS_PORT = 443
+
+PROXY_USER = "radware"
+PROXY_PASS = "radware"
 
 
 #################  Scope  #################
