@@ -182,7 +182,8 @@ V2.6
 
 				PROXY_USER = "radware"
 				PROXY_PASS = "radware"
-					
+	- 	Added UA header to InternetConnectivity function
+		
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

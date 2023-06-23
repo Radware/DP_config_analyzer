@@ -67,14 +67,15 @@ class Vision:
 
 		url = 'https://www.radware.com'
 
+		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.' + str(random.randint(1, 1000)) + '.0.0 Safari/537.36'}
+
 		try:
 
 			if cfg.PROXY:
 				proxy = {
 				'http': cfg.PROXY_HTTP + ':' + str(cfg.PROXY_HTTP_PORT),
-				'https': cfg.PROXY_HTTPS + ':' + str(cfg.PROXY_HTTPS_PORT),
-	}
-				response = requests.request(method='GET', url=url, proxies=proxy, verify=False)
+				}
+				response = requests.request(method='GET', url=url, headers=headers, proxies=proxy, verify=False)
 			else:
 				response = requests.request(method='GET', url=url, verify=False)
 
