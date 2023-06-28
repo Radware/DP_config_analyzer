@@ -170,11 +170,6 @@ V2.6
 	-	Added sending requests through Proxy option
 				!! config.py update is required (see config.py example) - added new proxy variables below:
 
-5.4.1
-	6/28/2023
-	-	Changed the way to get the latest signatures from vision instead of Radware
-
-				
 				################# Proxy settings #################
 
 				PROXY = False # True - use proxy server, False - don't use proxy server
@@ -188,6 +183,13 @@ V2.6
 				PROXY_USER = "radware"
 				PROXY_PASS = "radware"
 	- 	Added UA header to InternetConnectivity function
+	
+5.4.1
+	6/28/2023
+	-	Changed the way to get the latest signatures from vision instead of Radware
+
+				
+
 		
 # Functionality to be added:
 
