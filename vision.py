@@ -26,8 +26,9 @@ class Vision:
 		self.vision_ver = cfg.VISION_VER
 		self.report_duration = self.epochTimeGenerator(cfg.DURATION)
 		self.time_now = int(time.time())*1000
-		self.internet_connectivity = self.InternetConnectivity()
-
+		#self.internet_connectivity = self.InternetConnectivity()
+		self.all_subscriptions = self.getLatestSigDBVision()
+		self.latest_sig_db = self.all_subscriptions[0]["lastrelease"]
 		logging.info('Collecting DefensePro device list')
 		print('Collecting DefensePro device list')		
 		self.device_list = self.getDeviceList()
@@ -276,14 +277,21 @@ class Vision:
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/monitor?prop=rsPlatformIdentifier,rsWSDSysUpTime,rsWSDSysBaseMACAddress,rsIDSAttackDBVersion,rndManagedTime,rndManagedDate,rndBrgVersion,rdwrDPBuildID,rsWSDVersionStatus,rdwrDeviceThroughput,rsWSDDRAMSize,rsCoresNumber,rsCPUFrequency"
 
-		r = self.sess.get(url=policy_url, verify=False)
-		monitor_info = r.json()
+		try:
+			r = self.sess.get(url=policy_url, verify=False)
+			r.raise_for_status()
+			monitor_info = r.json()
+			return monitor_info
 
-		return monitor_info
-
+		except:
+			logging.info("Monitor info get error. DefensePro IP: " + dp_ip + ". Error message: " + r.text)
+			monitor_info = {'rsWSDSysBaseMACAddress': '00:00:00:00:00:00','rsIDSAttackDBVersion': '0000.0000.00'}
+			return monitor_info
+		
+	
 
 		
-	def getLatestSigDB(self,dp_base_mac):
+	def getLatestSigDBRadwre(self,dp_base_mac):
 
 		# Downloads DefensePro monitor info
 		url = "https://www.radware.com/modules/radware/packages/mis/autoattackupdate/FIRST.asp?protocol=2&pass=" + dp_base_mac
@@ -303,6 +311,27 @@ class Vision:
 			
 
 		return latest_sig_db
+	
+	def getLatestSigDBVision(self):
+
+		# Downloads DefensePro monitor info
+		url = self.base_url + "/mgmt/monitor/scc/AllSubscriptions"
+
+		try:
+			r = self.sess.get(url, verify=False)
+			r.raise_for_status()
+
+			all_subscriptions = r.content
+			all_subscriptions = json.loads(all_subscriptions) #change all_subscriptions from bytes to json
+
+			return all_subscriptions
+
+		except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError,requests.exceptions.SSLError,requests.exceptions.Timeout,requests.exceptions.ConnectTimeout,requests.exceptions.ReadTimeout) as err:	
+			logging.info(str(err))
+			print(str(err))
+			all_subscriptions = "No Connectivity"
+
+		return all_subscriptions
 
 	def getBDOSTrafficReport(self,pol_dp_ip,pol_attr,net_list):
 
@@ -736,21 +765,12 @@ class Vision:
 		full_sig_db_dic[dp_ip]['Version'] = val['Version']
 
 		dp_monitor_json = self.getMonitorInfo(dp_ip)
-
 		dp_base_mac = dp_monitor_json['rsWSDSysBaseMACAddress']
-		dp_base_mac_normalized = dp_base_mac.replace(":","") #remove : from mac address
 
 		full_sig_db_dic[dp_ip]['BaseMACAddress'] = dp_base_mac
-
 		full_sig_db_dic[dp_ip]['CurrentSignatureFileVersion'] = dp_monitor_json['rsIDSAttackDBVersion']
-		
-		if self.internet_connectivity:
-			latest_sig_db = self.getLatestSigDB(dp_base_mac_normalized)
-			latest_sig_db = str(latest_sig_db)
-		else:
-			latest_sig_db = "No Connectivity"
 
-		full_sig_db_dic[dp_ip]['LatestSignatureFileVersion'] = latest_sig_db
+		full_sig_db_dic[dp_ip]['LatestSignatureFileVersion'] = self.latest_sig_db
 		
 		return full_sig_db_dic
 	

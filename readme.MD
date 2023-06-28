@@ -169,6 +169,11 @@ V2.6
 	6/23/2023
 	-	Added sending requests through Proxy option
 				!! config.py update is required (see config.py example) - added new proxy variables below:
+
+5.4.1
+	6/28/2023
+	-	Changed the way to get the latest signatures from vision instead of Radware
+
 				
 				################# Proxy settings #################
 
