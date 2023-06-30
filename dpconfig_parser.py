@@ -250,14 +250,40 @@ class DataParser():
 				latest_sig_db = sig_dp_attr['LatestSignatureFileVersion']
 				dp_base_mac = sig_dp_attr['BaseMACAddress']
 
-
 				
-				if dp_base_mac == "00:00:00:00:00:00":
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-							csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-							csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Could not check current signature db. DefensePro is unreachable'])	
+				# if dp_base_mac == "00:00:00:00:00:00":
+				# 	with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+				# 			csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+				# 			csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Could not check current signature db. DefensePro is unreachable'])	
 
+
+				if latest_sig_db == "N/A": # Vision has no connectivity to www.radware.com
+					if cfg.SIG_LATEST_VER == "": # SIG_LATEST_VER in config.py is empty
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+								csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+								csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Could not fetch the latest signature version- Vision has no connectivity to www.radware.com. Latest signature is not set manually. It could be set manually using SIG_LATEST_VER variable in config.py'])
+
+					else: #SIG_LATEST_VER in config.py is set to a value
+						if latest_sig_db.startswith("0") and "." in latest_sig_db: #Check if SIG_LATEST_VER in config.py is in the correct format (Example SIG_LATEST_VER = "0009.0739.00")
+
+							latest_sig_db_int = latest_sig_db.split('.')[1]
+
+							current_sig_db_int = current_sig_db.split('.')[1]
+
+							delta_sig_db = int(latest_sig_db_int) - int(current_sig_db_int)
+							if delta_sig_db > cfg.SIG_DB_DELTA:
+								with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+										csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+										csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Signature database is outdated. Current Signature DB is "{current_sig_db}". Latest Signature DB is "{latest_sig_db}". Please update the Signature DB.'])
+						
+						else: # SIG_LATEST_VER in config.py is in the wrong format (Example of the correct format SIG_LATEST_VER = "0009.0739.00")
+							with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+									csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+									csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'SIG_LATEST_VER IN config.py is set in the wrong format. Please set SIG_LATEST_VER in the format below: SIG_LATEST_VER = "0009.0739.00"'])
+				
 				else:
+					
+
 					if latest_sig_db.startswith("0") and "." in latest_sig_db:
 
 						latest_sig_db_int = latest_sig_db.split('.')[1]
@@ -275,8 +301,7 @@ class DataParser():
 					else:
 						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
 								csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-								csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Unknown error getting signature db. Current signature db is {current_sig_db}'])
-
+								csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Unknown error getting signature db. Current signature db is {current_sig_db}. Latest signature db is {latest_sig_db_int}'])
 
 
 

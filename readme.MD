@@ -188,7 +188,14 @@ V2.6
 	6/28/2023
 	-	Changed the way to get the latest signatures from vision instead of Radware
 
-				
+5.4.2
+	6/30/2023
+	-	Added condition when checking for the latest signatures from vision, if Vision has no connectivity to www.radware.com , latest signature database can be set manually with a new variable as in below example SIG_LATEST_VER = "0009.0739.00"
+
+	!! config.py update is required (see config.py example) - added new proxy variable below:
+	
+	SIG_LATEST_VER
+	
 
 		
 # Functionality to be added:

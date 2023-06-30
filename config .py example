@@ -50,15 +50,15 @@ LOG_ROTATION_HISTORY = 10 # Maximum amount of files to keep
 SYSLOG_SERVER = "1.1.1.1" # Syslog server destination IP
 SYSLOG_PORT = 514 # Syslog server destination UDP port
 
-#Device Security parameters
+# Security parameters
 
 SSH_TIMEOUT = 120 # DefesePro SSH Timeout in minutes
 BDOS_LST = 50 # BDOS Learning Suppression in %
 BDOS_BW_IN = 100000 # BDOS Inbound Traffic Bandwidth setting in Kbps
 BDOS_BW_OUT = 100000 # BDOS Outbound Traffic Bandwidth setting in Kbps
 SIG_SMPL_RATE = 503
-SIG_DB_DELTA = 2 # Signature DB Delta from the latest release to the current release in weeks
-
+SIG_DB_DELTA = 0 # Signature DB Delta from the latest release to the current release in weeks. 0 equals to the latest release. 1 equals to the previous release. 2 equals to the release before the previous release and so on. 
+SIG_LATEST_VER = "" # Optional variable. Format SIG_LATEST_VER = "0009.0739.00" . If vision has no connectivity to radware.com to fetch the latest signature version. It can be set manually using this variable to compare if DefensePro database is outdated. Latest signature could be checked here https://portals.radware.com/Customer/Home/Tools/Security-Updates/
 
 # Email set up parameters for sending email with reports
 SMTP_AUTH = True
