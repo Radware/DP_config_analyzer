@@ -42,21 +42,21 @@ class DataMapper():
 
 		try:
 			if not dp_attr['Policies']:
-				print(f'{dp_ip} is not unavailable')
+				print(f'{dp_ip} is unavailable')
 				return False
 		except:
 			pass
 
 		try:
 			if dp_attr['Policies'] == None:
-				print(f'{dp_ip} is not unavailable')
+				print(f'{dp_ip} is unavailable')
 				return False
 		except:
 			pass
 
 		try:	
 			if not dp_attr['Profiles']:
-				print(f'{dp_ip} is not unavailable')
+				print(f'{dp_ip} is unavailable')
 				return False
 		except:
 			pass

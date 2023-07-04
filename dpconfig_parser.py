@@ -69,138 +69,157 @@ class DataParser():
 					#Necessary to check if specific policy is cathcall
 					catchall_pol = self.iscatchAllPolicy(dp_ip, policy['rsIDSNewRulesSource'], policy['rsIDSNewRulesDestination']) 
 
-
-				if not no_prof_pol:
-					# Check if no profiles applied on policy
-					no_prof_pol = self.isProfExistsPolicy(dp_name,dp_ip,policy)
+				if cfg.POLICY_NO_PROFILES or cfg.ALL_CHECKS:
+					if not no_prof_pol:
+						# Check if no profiles applied on policy
+						no_prof_pol = self.isProfExistsPolicy(dp_name,dp_ip,policy)
 				
-				if self.isTwoWayPolicy(dp_ip,policy['rsIDSNewRulesDirection']):
-					# Check if policy direction is Two Way
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy direction is Two way")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy direction is Two way'])
+				
+				if cfg.POLICY_TWO_WAY or cfg.ALL_CHECKS:
+					if self.isTwoWayPolicy(dp_ip,policy['rsIDSNewRulesDirection']):
+						# Check if policy direction is Two Way
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy direction is Two way")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy direction is Two way. It is recommended to configure policy direction to One way.'])
 
+				if cfg.POLICY_REPORT_MODE or cfg.ALL_CHECKS:
+					if self.isReportModePolicy(dp_ip,policy['rsIDSNewRulesAction']):
+						# Check if policy direction is Two Way
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy is in Report Only mode")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy is in Report Only mode'])
 
-				if self.isReportModePolicy(dp_ip,policy['rsIDSNewRulesAction']):
-					# Check if policy direction is Two Way
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy is in Report Only mode")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy is in Report Only mode'])
+				if cfg.POLICY_DISABLED or cfg.ALL_CHECKS:
+					if self.isDisabledPolicy(dp_ip,policy['rsIDSNewRulesState']):
+						# Check if policy is disabled
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy is disabled")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy is disabled'])
 
-				if self.isDisabledPolicy(dp_ip,policy['rsIDSNewRulesState']):
-					# Check if policy is disabled
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Policy is disabled")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Policy is disabled'])
+				if cfg.POLICY_PACKET_REPORTING or cfg.ALL_CHECKS:
+					if self.isPacketReportingEnabledPolicy(dp_ip,policy['rsIDSNewRulesPacketReportingStatus']):
+						# Check if packet reporting is disabled
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Packet reporting is disabled")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Packet reporting is disabled'])
 
-				if self.isPacketReportingEnabledPolicy(dp_ip,policy['rsIDSNewRulesPacketReportingStatus']):
-					# Check if packet reporting is disabled
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Packet reporting is disabled")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Packet reporting is disabled'])
+				if cfg.POLICY_BDOS_PROF or cfg.ALL_CHECKS:
+					if self.isBDOSProfileAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileNetflood']) and not no_prof_pol:
+						# Check if BDOS profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("BDOS profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'BDOS profile is not applied'])
 
-				if self.isBDOSProfileAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileNetflood']) and not no_prof_pol:
-					# Check if BDOS profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("BDOS profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'BDOS profile is not applied'])
-
-				if self.isSignatureProfileAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileAppsec']) and not no_prof_pol:
-					# Check if Signature profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Signature profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Signature profile is not applied'])
+				if cfg.POLICY_SIG_PROF or cfg.ALL_CHECKS:
+					if self.isSignatureProfileAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileAppsec']) and not no_prof_pol:
+						# Check if Signature profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Signature profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Signature profile is not applied'])
 		
 				if not no_prof_pol:
-					self.isSignatureDOSAllAppliedPolicy(dp_name,dp_ip, policy, self.full_sig_dic)
-						# Check if all Dos-All rules are applied on signature profile
+					if cfg.POLICY_SIG_DOSALL or cfg.ALL_CHECKS:
+						self.isSignatureDOSAllAppliedPolicy(dp_name,dp_ip, policy, self.full_sig_dic)
+							# Check if all Dos-All rules are applied on signature profile
 
 
-				if self.isOOSAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileStateful']) and not no_prof_pol:
-					# Check if Out of State profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Out of State profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Out of State profile is not applied'])
+				if cfg.POLICY_OOS_PROF or cfg.ALL_CHECKS:
+					if self.isOOSAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileStateful']) and not no_prof_pol:
+						# Check if Out of State profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Out of State profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Out of State profile is not applied'])
 
-				if self.isConnLimAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileConlmt']) and not no_prof_pol:
-					# Check if Connection Limit profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Connection Limit profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Connection Limit profile is not applied'])
+				if cfg.POLICY_CONNLIM_PROF or cfg.ALL_CHECKS:
+					if self.isConnLimAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileConlmt']) and not no_prof_pol:
+						# Check if Connection Limit profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("Connection Limit profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Connection Limit profile is not applied'])
 
-				if self.isSYNFloodAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileSynprotection']) and not no_prof_pol:
-					# Check if SYN Flood profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("SYN Flood profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'SYN Flood profile is not applied'])
+				if cfg.POLICY_SYNP_PROF or cfg.ALL_CHECKS:
+					if self.isSYNFloodAppliedPolicy(dp_ip,policy['rsIDSNewRulesProfileSynprotection']) and not no_prof_pol:
+						# Check if SYN Flood profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("SYN Flood profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'SYN Flood profile is not applied'])
 
-				if not self.isEAAFAppliedPolicy(dp_ip,policy) and not no_prof_pol:
-					# Check if EAAF profile is applied on the policy
-					# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("ERT Active Attacker Feed profile is not applied")
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'ERT Active Attacker Feed profile is not applied'])
+				if cfg.POLICY_EAAF_PROF or cfg.ALL_CHECKS:
+					if not self.isEAAFAppliedPolicy(dp_ip,policy) and not no_prof_pol:
+						# Check if EAAF profile is applied on the policy
+						# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append("ERT Active Attacker Feed profile is not applied")
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'ERT Active Attacker Feed profile is not applied'])
 
 				if not no_prof_pol:
-					self.isDNSSigProfAppliedPolicy(dp_name, dp_ip,policy, self.full_sig_dic)
-						# Check if DNS Services Signature + DOS-All profile exists on the DNS policy
+					if cfg.POLICY_DNS_PROF or cfg.ALL_CHECKS:
+						self.isDNSSigProfAppliedPolicy(dp_name, dp_ip,policy, self.full_sig_dic)
+							# Check if DNS Services Signature + DOS-All profile exists on the DNS policy
 
-				if not hb_pol:
-					if no_prof_pol and not catchall_pol:
-						hb_pol = self.isHBPolicy(dp_ip,policy,self.full_net_dic)
+				if cfg.BYPASS_SWITCH or cfg.ALL_CHECKS:
+					if not hb_pol:
+						if no_prof_pol and not catchall_pol:
+							hb_pol = self.isHBPolicy(dp_ip,policy,self.full_net_dic)
 
-				if not hb_glob:
-					if no_prof_pol and not catchall_pol:
-						hb_glob = self.isHBPolicy(dp_ip,policy,self.full_net_dic)
+					if not hb_glob:
+						if no_prof_pol and not catchall_pol:
+							hb_glob = self.isHBPolicy(dp_ip,policy,self.full_net_dic)
 
-				if catchall_pol and dp_version !=6:
-					if policy['rsIDSNewRulesPriority'] != 'null':
-						# print(dp_ip,policy,'\r\n---')
-						if int(policy['rsIDSNewRulesPriority']) != lowest_pol_priority:
-							# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append(f'Catchall policy is not the least priority policy')
-							with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-								bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-								bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Catchall policy is not the least priority policy'])
+				if cfg.POLICY_CATCHALL_LAST or cfg.ALL_CHECKS:
+					if catchall_pol and dp_version !=6:
+						if policy['rsIDSNewRulesPriority'] != 'null':
+							# print(dp_ip,policy,'\r\n---')
+							if int(policy['rsIDSNewRulesPriority']) != lowest_pol_priority:
+								# self.parseDict[dp_ip][policy['rsIDSNewRulesName']].append(f'Catchall policy is not the least priority policy')
+								with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+									bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+									bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'Catchall policy is not the least priority policy'])
 
 
 			
-
-			self.checkBDOSProf( dp_ip, dp_name, dp_attr['Policies']['rsIDSNewRulesTable'], self.full_bdosprofconf_dic)
-			self.checkSYNPProf( dp_ip, dp_name, dp_attr['Policies']['rsIDSNewRulesTable'], self.full_synprofconf_dic)
+			if cfg.BDOS_PROF_CHECKS or cfg.ALL_CHECKS:
+				self.checkBDOSProf( dp_ip, dp_name, dp_attr['Policies']['rsIDSNewRulesTable'], self.full_bdosprofconf_dic)
+			
+			if cfg.SYNP_PROF_CHECKS or cfg.ALL_CHECKS:
+				self.checkSYNPProf( dp_ip, dp_name, dp_attr['Policies']['rsIDSNewRulesTable'], self.full_synprofconf_dic)
 				
 				
+			if cfg.BYPASS_SWITCH or cfg.ALL_CHECKS:
+				if not hb_glob and not catchall_glob:
+					# self.parseDict[dp_ip]['N/A'].append(f'If DefensePro is deployed with Silicom Bypass switch, recommended policy for the heartbeat monitoring does not exist')
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'If DefensePro is deployed with Silicom Bypass switch, recommended policy for the heartbeat monitoring does not exist'])
 
+			if cfg.NO_CATCHALL_POL:
+				if not catchall_glob: # Check if DP has no catchall policy
+					# self.parseDict[dp_ip]['N/A'].append(f'No catchall policy')
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'No catchall policy'])
 
-			if not hb_glob and not catchall_glob:
-				# self.parseDict[dp_ip]['N/A'].append(f'If DefensePro is deployed with Silicom Bypass switch, recommended policy for the heartbeat monitoring does not exist')
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'If DefensePro is deployed with Silicom Bypass switch, recommended policy for the heartbeat monitoring does not exist'])
-
-
-			if not catchall_glob: # Check if DP has no catchall policy
-				# self.parseDict[dp_ip]['N/A'].append(f'No catchall policy')
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'{pol_name}' , 'No catchall policy'])
-
-			if dp_version == 7: # Check if DP v7.x has unequal instance distribution across the policies
-				self.v7CountInstance(dp_name, dp_ip, dp_attr['Policies']['rsIDSNewRulesTable'])
+			if cfg.DP_V7_EVEN_INSTANCE:
+				if dp_version == 7: # Check if DP v7.x has unequal instance distribution across the policies
+					self.v7CountInstance(dp_name, dp_ip, dp_attr['Policies']['rsIDSNewRulesTable'])
 
 			self.parseDPConfig(dp_ip, dp_name) #Perform DP config files checks
-			self.parseDPSignatureDB(dp_ip, dp_name, self.full_sig_db_dic) #Check if DP has the latest signature DB
 
-		if self.isDPAvailable(dp_ip, dp_attr):
-			self.netClassDuplication(self.full_net_dic, self.full_pol_dic) #Check if network class is unused, shared, duplicate or subnet of another class
+			if cfg.SIG_LATEST_VER_CHECK or cfg.ALL_CHECKS:
+				self.parseDPSignatureDB(dp_ip, dp_name, self.full_sig_db_dic) #Check if DP has the latest signature DB
+
+		if cfg.NETCLASS_CHECKS or cfg.ALL_CHECKS:
+			if self.isDPAvailable(dp_ip, dp_attr):
+				self.netClassDuplication(self.full_net_dic, self.full_pol_dic) #Check if network class is unused, shared, duplicate or subnet of another class
 
 
 		report = reports_path + f'dpconfig_report_{self.timenow}.csv'
@@ -251,11 +270,6 @@ class DataParser():
 				dp_base_mac = sig_dp_attr['BaseMACAddress']
 
 				
-				# if dp_base_mac == "00:00:00:00:00:00":
-				# 	with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-				# 			csv_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-				# 			csv_writer.writerow([f'{dp_name}' , f'{dp_ip}' ,	f'N/A' , f'Could not check current signature db. DefensePro is unreachable'])	
-
 
 				if latest_sig_db == "N/A": # Vision has no connectivity to www.radware.com
 					if cfg.SIG_LATEST_VER == "": # SIG_LATEST_VER in config.py is empty
@@ -537,7 +551,7 @@ class DataParser():
 
 
 
-							if int(bdos_prof['rsNetFloodProfileBandwidthIn']) < cfg.BDOS_BW_IN: # Check if Outbound BDOS Bandwidth is set no lower than desered bandwidth
+							if int(bdos_prof['rsNetFloodProfileBandwidthIn']) < cfg.BDOS_BW_IN: # Check if Inbound BDOS Bandwidth is set no lower than desered bandwidth
 								# print(f'{pol_dp_name}' , f'{pol_dp_ip}' , f'{pol_name}' , f'BDOS Profile "{bdos_prof_name}" Inbound Traffic is set too low - ', int(int(bdos_prof['rsNetFloodProfileBandwidthIn'])/1000), f'Mbps vs minimum recommended {int(cfg.BDOS_BW_IN/1000)} Mbps.')
 								with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
 									bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -725,9 +739,15 @@ class DataParser():
 			config = f.read()
 		
 			config = config.replace('\\'"\n","") #Normalize splitted lines (\\\r\n)
+		# close the file
+		f.close()
 
+		# open the file in write mode
 		with open(config_path + f'{dp_ip}_config.txt', 'w') as f:
 			f.write(config) #Write updated lines
+		# close the file
+		f.close()
+
 		############################################
 
 
@@ -741,56 +761,61 @@ class DataParser():
 				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
 					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'{dp_name} - Error downloading configuration file - {content}'])
-	
-			if "!Software Version: 8" in content: # For software versions other than 8.x
-				if "manage web-services status set enable" in content:
-					# print(f'{dp_ip} Web-services access is enabled. In most cases this service is required for external automation through SOAP calls. Disable if unnecessary. To disable - > "manage web-services status set disable"')
+
+			if cfg.WEB_SERVICES_ACCESS_ENABLED or cfg.ALL_CHECKS:
+				if "!Software Version: 8" in content: # For software versions other than 8.x
+					if "manage web-services status set enable" in content:
+						# print(f'{dp_ip} Web-services access is enabled. In most cases this service is required for external automation through SOAP calls. Disable if unnecessary. To disable - > "manage web-services status set disable"')
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Web-services access is enabled. In most cases this service is required for external automation through SOAP calls. Disable if unnecessary. To disable - > "manage web-services status set disable"'])
+
+			if cfg.HTTP_ACCESS_ENABLED or cfg.ALL_CHECKS:
+				if not "!Software Version: 8" in content: # For software versions other than 8.x
+					# print(dp_ip +' is not v8.x')
+					if "manage web status set enable" in content:
+						# print(f'{dp_ip} HTTP Access on port 80 is enabled. To disable - > "manage web status set disable"')
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'HTTP Access on port 80 is enabled. To disable - > "manage web status set disable"'])
+
+			if cfg.SSH_TIMEOUT_DEFAULT or cfg.ALL_CHECKS:
+				if "manage ssh session-timeout set" not in content:
+					# print(f'{dp_ip} - SSH Timeout is set to default (v8.x 10 min, v6.x 5 min). Recommended timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set 120')
 					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
 						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Web-services access is enabled. In most cases this service is required for external automation through SOAP calls. Disable if unnecessary. To disable - > "manage web-services status set disable"'])
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'SSH Timeout is set to default (v8.x 10 min, v6.x 5 min). Recommended timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}'])
 
 
-			if not "!Software Version: 8" in content: # For software versions other than 8.x
-				# print(dp_ip +' is not v8.x')
-				if "manage web status set enable" in content:
-					# print(f'{dp_ip} HTTP Access on port 80 is enabled. To disable - > "manage web status set disable"')
+			if cfg.SERVICE_AUDITING or cfg.ALL_CHECKS:
+				if "services auditing status set Enabled" not in content:
+					# print(f'{dp_name} - Service auditing is not enabled. To enable -> services auditing status set enable')
+
 					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
 						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'HTTP Access on port 80 is enabled. To disable - > "manage web status set disable"'])
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Service auditing is not enabled. To enable -> services auditing status set enable'])
 
 
-			if "manage ssh session-timeout set" not in content:
-				# print(f'{dp_ip} - SSH Timeout is set to default (v8.x 10 min, v6.x 5 min). Recommended timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set 120')
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'SSH Timeout is set to default (v8.x 10 min, v6.x 5 min). Recommended timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}'])
-		
-			if "services auditing status set Enabled" not in content:
-				# print(f'{dp_name} - Service auditing is not enabled. To enable -> services auditing status set enable')
+				if "services auditing type set Extended" not in content:
+					# print(f'{dp_name} - Extended service auditing is not enabled. To enable -> services auditing type set Extended')
 
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Service auditing is not enabled. To enable -> services auditing status set enable'])
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Extended service auditing is not enabled. To enable -> services auditing type set Extended'])
 
-			if "services auditing type set Extended" not in content:
-				# print(f'{dp_name} - Extended service auditing is not enabled. To enable -> services auditing type set Extended')
+			if cfg.TELNET_ACCESS_ENABLED or cfg.ALL_CHECKS:
+				if "manage telnet status set enable" in content:
+					# print(f'{dp_ip} Telnet Access on port 23 is enabled. To disable - > "manage telnet status set disable"')
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Telnet Access on port 23 is enabled. To disable - > "manage telnet status set disable"'])
 
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Extended service auditing is not enabled. To enable -> services auditing type set Extended'])
-
-
-			if "manage telnet status set enable" in content:
-				# print(f'{dp_ip} Telnet Access on port 23 is enabled. To disable - > "manage telnet status set disable"')
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Telnet Access on port 23 is enabled. To disable - > "manage telnet status set disable"'])
-
-			if "dp signatures-protection dos-shield global sampling-rate-old set" not in content:
-				#print(f'{dp_ip} - Signature dos-shield sampling rate is set to default 5001. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set X')
-				with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-					bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-					bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Signature dos-shield sampling rate is set to default 5001. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}'])
+			if cfg.SIG_SMPL_RATE_DEFAULT or cfg.ALL_CHECKS:
+				if "dp signatures-protection dos-shield global sampling-rate-old set" not in content:
+					#print(f'{dp_ip} - Signature dos-shield sampling rate is set to default 5001. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set X')
+					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Signature dos-shield sampling rate is set to default 5001. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}'])
 
 
 			f.seek(0) #back to first line to parse line by line
@@ -798,21 +823,23 @@ class DataParser():
 
 			####################Parsing config file line by line section###############
 			for line in f: #parse config file line by line
-				if "manage ssh session-timeout set" in line and f'manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}' not in line:
-					# print(f'{dp_ip} - SSH timeout is set to -' + str(line.split()[4]) + f' minutes. Recommended SSH timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set 120')
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'SSH timeout is set to ' + str(line.split()[4]) + f' minutes. Recommended SSH timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}'])
+				if cfg.SSH_TIMEOUT_CHECK or cfg.ALL_CHECKS:
+					if "manage ssh session-timeout set" in line and f'manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}' not in line:
+						# print(f'{dp_ip} - SSH timeout is set to -' + str(line.split()[4]) + f' minutes. Recommended SSH timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set 120')
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'SSH timeout is set to ' + str(line.split()[4]) + f' minutes. Recommended SSH timeout is {str(cfg.SSH_TIMEOUT)} min. To set SSH timeout -> manage ssh session-timeout set {str(cfg.SSH_TIMEOUT)}'])
 
-				
-				if "dp signatures-protection dos-shield global sampling-rate-old set" in line and f'dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}' not in line:
-					# print(line.split()[6])
-					# print(f'{dp_ip} - Signature dos-shield sampling rate is set to {str(line.split()[6])}. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}')
-					with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
-						bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-						bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Signature dos-shield sampling rate is set to {str(line.split()[6])}. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}'])
+				if cfg.SIG_SMPL_RATE_CHECK or cfg.ALL_CHECKS:
+					if "dp signatures-protection dos-shield global sampling-rate-old set" in line and f'dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}' not in line:
+						# print(line.split()[6])
+						# print(f'{dp_ip} - Signature dos-shield sampling rate is set to {str(line.split()[6])}. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}')
+						with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='a', newline="") as dpconfig_report:
+							bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+							bdos_writer.writerow([f'{dp_name}' , f'{dp_ip}' , f'N/A' , f'Signature dos-shield sampling rate is set to {str(line.split()[6])}. Recommended dos-shield sampling rate for non heavy traffic volume devices is {str(cfg.SIG_SMPL_RATE)}. To set dos-shield sampling rate -> dp signatures-protection dos-shield global sampling-rate-old set {str(cfg.SIG_SMPL_RATE)}'])
 
-	
+		# close the file
+		f.close()
 		return
 
 	def netClassDuplication(self, full_net_dic, full_pol_dic):

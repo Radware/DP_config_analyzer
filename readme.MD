@@ -196,7 +196,62 @@ V2.6
 	
 	SIG_LATEST_VER
 	
+5.5
+	7/4/2023
+	-	Added new feature to control which checks to be done when providing recommendations.
 
+	!! config.py update is required (see config.py example) - added new proxy variable below:
+
+					################# Best practice checklist parameters switch On/Off #################
+				# This section defines what parameters to check from the Best Practice Checklist
+
+				ANALYZE_CONFIG = True # True - Analyze DefensePro configuration to /Reports/dpconfig_report.csv, False - don't analyze configuration 
+
+				ALL_CHECKS = False # True - Run all checks and override all checks defined below, False - Run only checks defined below
+
+				POLICY_NO_PROFILES =			True # True - Report if DefensePro policy does not have any profiles applied. False - do not report if DefensePro policy does not have any profiles applied
+				POLICY_TWO_WAY = 				True # True - Report if DefensePro policy is configued in two-way mode. False - do not report if DefensePro policy is configued in two-way mode
+				POLICY_REPORT_MODE = 			True # True - Report if DefensePro policy is configued in report mode. False - do not report if DefensePro policy is configued in report mode
+				POLICY_DISABLED = 				True # True - Report if DefensePro policy is configued in disabled mode. False - do not report if DefensePro policy is configued in disabled mode
+				POLICY_PACKET_REPORTING = 		True # True - Report if DefensePro packet reporting is disabled on the policy. False - do not report if DefensePro packet reporting is disabpled on the policy
+				POLICY_BDOS_PROF = 				True # True - Report if BDOS profile is not applied on the DefensePro policy. False - do not report if BDOS profile is not applied on the DefensePro policy
+				POLICY_SIG_PROF = 				True # True - Report if Signature profile is not applied on the DefensePro policy. False - do not report if Signature profile is not applied on the DefensePro policy
+				POLICY_SIG_DOSALL = 			True # True - Report if Signature profile does not have all Dos-All rules. False - do not report if Signature profile does not have all Dos-All rules
+				POLICY_OOS_PROF = 				True # True - Report if Out of State profile is not applied on the DefensePro policy. False - do not report if Out of State profile is not applied on the DefensePro policy
+				POLICY_CONNLIM_PROF =			True # True - Report if Connection Limit profile is not applied on the DefensePro policy. False - do not report if Connection Limit profile is not applied on the DefensePro policy
+				POLICY_SYNP_PROF = 				True # True - Report if SYN Protection profile is not applied on the DefensePro policy. False - do not report if SYN Protection profile is not applied on the DefensePro policy
+				POLICY_EAAF_PROF = 				True # True - Report if EAAF profile is not applied on the DefensePro policy. False - do not report if EAAF profile is not applied on the DefensePro policy
+				POLICY_DNS_PROF = 				True # True - Report if DNS profile on the DNS policy does not have the DNS Services Signature + DOS-All rules. False - do not report if DNS profile on the DNS policy does not have the DNS Services Signature + DOS-All rules.
+				POLICY_CATCHALL_LAST = 			True # True - Report if Catch-All rule is not the last rule in the DefensePro policy. False - do not report if Catch-All rule is not the last rule in the DefensePro policy
+				BDOS_PROF_CHECKS = 				True # True - Run BDOS profile checks, False - do not run BDOS profile checks. BDOS profile checks are: 
+														# BDOS profiles is in Report-Only mode
+														# Footprint Strictness is not Medium
+														# Learning suppression is set not to the configured value(defined as "BDOS_LST" in config.py)
+														# UDP Packet Rate Detection Sensitivity is not set to Low/Ignore
+														# Check if all BDOS supported prootocols are enabled for BDOS inspection
+														# Inbound or outbound BDOS bandwidth is configured below the configured threshold (defined as "BDOS_BW_IN" and "BDOS_BW_OUT" in config.py)
+														# Burst-Attack Protection" is disabled
+														# BDOS Profile is not applied on any policy (orphaned)
+				SYNP_PROF_CHECKS = 				True # True - Run SYN Protection profile checks, False - do not run SYN Protection profile checks. SYN Protection profile checks are:
+														# SYN FLood Profile is in Report-Only mode
+														# SYN Flood Profile is not applied on any policy (orphaned)
+				BYPASS_SWITCH = 				False # True - DefensePro is deployed with Silicom bypass switch, report if DefensePro does not have a heartbeat policy for the Silicom bypass switch, False - DefensePro is deployed without bypass switch
+				NO_CATCHALL_POL = 				True # True - Report if DefensePro does not have a Catch-All policy, False - do not report if DefensePro does not have a Catch-All policy
+				DP_V7_EVEN_INSTANCE = 			True # True - Report if DefensePro version 7.x instances are not evenly distributed across the policies. False - do not report if DefensePro version 7.x instances are not evenly distributed across the policies.
+				WEB_SERVICES_ACCESS_ENABLED = 	True # True - Report if Web Services Access is enabled on the DefensePro, False - do not report if Web Services Access is enabled on the DefensePro
+				HTTP_ACCESS_ENABLED =			True # True - Report if HTTP Access is enabled on the DefensePro, False - do not report if HTTP Access is enabled on the DefensePro
+				SSH_TIMEOUT_DEFAULT = 			True # True - Report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min), False - do not report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min)
+				SERVICE_AUDITING = 				True # True - Report if Service Auditing is disabled and not in extended mode on the DefensePro, False - do not report if Service Auditing is disabled on the DefensePro
+				TELNET_ACCESS_ENABLED = 		True # True - Report if Telnet Access is enabled on the DefensePro, False - do not report if Telnet Access is enabled on the DefensePro
+				SIG_SMPL_RATE_DEFAULT = 		True # True - Report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py). False - do not report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py)
+				SSH_TIMEOUT_CHECK =				True # True - Report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py), False - do not report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py)
+				SIG_SMPL_RATE_CHECK = 			True # True - Report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py), False - do not report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py)
+				SIG_LATEST_VER_CHECK = 			True # True - Report if DefensePro signature database is outdated, False - do not report if DefensePro signature database is outdated
+				NETCLASS_CHECKS = 				True # True - Run Network Class checks, False - do not run Network Class checks. Network Class checks are:
+														# Network class "{net}" is not applied on any policy
+														# Network classss "{net}" is shared across multiple policies
+														# Network class has a network subnet which is subnet of another larger subnet in another network class
+														# Duplicate network in different network classes
 		
 # Functionality to be added:
 
