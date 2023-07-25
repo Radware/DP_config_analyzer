@@ -266,6 +266,12 @@ def parseTrafficStatsCEC():
 					traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 					traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'---All Policies---', f'---All Combined---' , f'N/A','N/A', f'N/A','N/A','N/A', 'N/A','N/A',f'{top_currcps_avg}'])
 
+			else: # IF CEC is 0
+				# Traffic Utilization Stats collection - max traffic average per policy
+				with open(reports_path + f'traffic_stats_temp4.csv', mode='a', newline="") as traffic_stats:
+					traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+					traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'---All Policies---', f'---All Combined---' , f'N/A','N/A', f'N/A','N/A','N/A', 'N/A','N/A',f'0'])
+			
 				
 
 def parseBDOSStats():
@@ -446,9 +452,20 @@ def parseBDOSStats_PPS():
 									# # Add the updated row / list to the output file
 										csv_writer.writerow(row)
 
-					######################
+	
+	# Below lines are to copy the Traffic Stats temp file to the final file
+	with open(reports_path + f'traffic_stats_temp4.csv', 'r') as read_obj, open(reports_path + f'traffic_stats_{timenow}.csv', 'a', newline='') as write_obj:
+	# Create a csv.reader object from the input file object
+		csv_reader = csv.reader(read_obj)
 
+		# Create a csv.writer object from the output file object
+		csv_writer = csv.writer(write_obj)
 
+		# Read each row of the input csv file as list
+		for row in csv_reader:
+			# Append the default text in the row / list
+			if row[3] == "---All Combined---":
+				csv_writer.writerow(row)
 
 def parseDNSStats():
 	with open(raw_data_path + 'DNS_traffic_report.json') as json_file:
