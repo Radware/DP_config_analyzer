@@ -91,6 +91,7 @@ def get_data_from_vision(key,val):
 	global full_connlimprofconf_dic
 	global full_oosprofconf_dic
 	global bdos_stats_dict
+	global bdos_stats_dict_pps
 	global dns_stats_dict
 	global traffic_stats_dict_bps
 	global traffic_stats_dict_pps
@@ -138,6 +139,11 @@ def get_data_from_vision(key,val):
 		print(f'Collecting BDOS stats data from Defensepro {key}')
 		logging_helper.logging.info('Collecting BDOS stats data')
 		bdos_stats_dict = v.getBDOSReportFromVision(full_pol_dic,full_net_dic,bdos_stats_dict)
+
+		print(f'Collecting BDOS PPS stats data from Defensepro {key}')
+		logging_helper.logging.info('Collecting BDOS PPS stats data')
+		bdos_stats_dict_pps = v.getBDOSReportFromVision_PPS(key,val,full_pol_dic,full_net_dic,bdos_stats_dict_pps)
+	
 
 		print(f'Collecting DNS stats data from Defensepro {key}')
 		logging_helper.logging.info('Collecting DNS stats data')
@@ -228,6 +234,9 @@ if not getdatafromvision:
 		with open(raw_data_path + 'BDOS_traffic_report.json') as full_bdos_stats_file:
 			bdos_stats_dict = json.load(full_bdos_stats_file)
 
+		with open(raw_data_path + 'BDOS_traffic_report_PPS.json') as full_bdos_stats_pps_file:
+			bdos_stats_dict_pps = json.load(full_bdos_stats_pps_file)
+
 		with open(raw_data_path + 'DNS_traffic_report.json') as full_dns_stats_file:
 			dns_stats_dict = json.load(full_dns_stats_file)
 
@@ -259,6 +268,7 @@ else: #getdatafromvision = True - collect data from vision
 	if cfg.TRAFFIC_STATS:
 		bdos_stats_dict = {}
 		dns_stats_dict = {}
+		bdos_stats_dict_pps = {}
 		traffic_stats_dict_bps = {}
 		traffic_stats_dict_pps = {}
 		traffic_stats_dict_cps = {}
@@ -385,6 +395,9 @@ else: #getdatafromvision = True - collect data from vision
 
 		with open(raw_data_path + 'BDOS_traffic_report.json', 'w') as outfile:
 			json.dump(bdos_stats_dict,outfile)
+
+		with open(raw_data_path + 'BDOS_traffic_report_PPS.json', 'w') as bdos_pps_file:
+			json.dump(bdos_stats_dict_pps,bdos_pps_file)
 
 		with open(raw_data_path + 'DNS_traffic_report.json', 'w') as outfile:
 			json.dump(dns_stats_dict,outfile)

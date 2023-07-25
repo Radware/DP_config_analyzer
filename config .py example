@@ -98,7 +98,11 @@ NO_CATCHALL_POL = 				True # True - Report if DefensePro does not have a Catch-A
 DP_V7_EVEN_INSTANCE = 			True # True - Report if DefensePro version 7.x instances are not evenly distributed across the policies. False - do not report if DefensePro version 7.x instances are not evenly distributed across the policies.
 WEB_SERVICES_ACCESS_ENABLED = 	True # True - Report if Web Services Access is enabled on the DefensePro, False - do not report if Web Services Access is enabled on the DefensePro
 HTTP_ACCESS_ENABLED =			True # True - Report if HTTP Access is enabled on the DefensePro, False - do not report if HTTP Access is enabled on the DefensePro
-SSH_TIMEOUT_DEFAULT = 			True # True - Report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min), False - do not report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min)
+
+SSH_TIMEOUT_CHECK =				True # True - Report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py), False - do not report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py)
+SSH_TIMEOUT_DEFAULT = 			False # True - Report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min), False - do not report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min)
+SSH_TIMEOUT = 5 # DefesePro SSH Timeout in minutes
+
 SERVICE_AUDITING = 				True # True - Report if Service Auditing is disabled and not in extended mode on the DefensePro, False - do not report if Service Auditing is disabled on the DefensePro
 TELNET_ACCESS_ENABLED = 		True # True - Report if Telnet Access is enabled on the DefensePro, False - do not report if Telnet Access is enabled on the DefensePro
 SIG_SMPL_RATE_DEFAULT = 		True # True - Report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py). False - do not report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py)

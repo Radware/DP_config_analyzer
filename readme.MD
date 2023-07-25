@@ -252,7 +252,11 @@ V2.6
 														# Network classss "{net}" is shared across multiple policies
 														# Network class has a network subnet which is subnet of another larger subnet in another network class
 														# Duplicate network in different network classes
-		
+
+5.6 (7/25/2023)
+
+	-	Added collecting and reporting on max average BDOS PPS and PPS Baseline under traffic_stats report
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
