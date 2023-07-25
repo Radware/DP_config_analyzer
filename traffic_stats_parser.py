@@ -415,14 +415,8 @@ def parseBDOSStats_PPS():
 								# Append the default text in the row / list
 								if row[0] == dp_ip and row[2] == policy and row[3] == protoc:
 									
-									if row['normal'] is not None:
-										row[8] = top10_currthroughput_avg_pps
-										row[9] = float(normal_baseline)
-
-									else:
-										row[8] = top10_currthroughput_avg_pps
-										row[9] = 'None'					
-
+									row[8] = top10_currthroughput_avg_pps
+									row[9] = float(normal_baseline)
 
 				
 								# # Add the updated row / list to the output file
