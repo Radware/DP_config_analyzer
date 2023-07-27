@@ -399,9 +399,14 @@ def parseBDOSStats_PPS():
 
 						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
 						top_10_currthroughput_list = [currthroughput_list[i] for i in top_10_currthroughput_idx]
-				
-						top10_currthroughput_avg_pps = (sum(top_10_currthroughput_list)) / (len(top_10_currthroughput_list))
 
+						
+
+						top10_currthroughput_avg_pps = (sum(top_10_currthroughput_list)) / (len(top_10_currthroughput_list))
+						# set top10_currthroughput_avg_pps two decimals only
+						top10_currthroughput_avg_pps = float("{:.2f}".format(top10_currthroughput_avg_pps))
+
+						
 					
 						with open(reports_path + f'traffic_stats_temp4.csv', 'r') as read_obj, open(reports_path + f'traffic_stats_{timenow}.csv', 'a', newline='') as write_obj:
 						# Create a csv.reader object from the input file object
@@ -414,15 +419,11 @@ def parseBDOSStats_PPS():
 							for row in csv_reader:
 								# Append the default text in the row / list
 								if row[0] == dp_ip and row[2] == policy and row[3] == protoc:
+								
+									row[8] = top10_currthroughput_avg_pps
+									row[9] = float(normal_baseline)
+
 									
-									if row['normal'] is not None:
-										row[8] = top10_currthroughput_avg_pps
-										row[9] = float(normal_baseline)
-
-									else:
-										row[8] = top10_currthroughput_avg_pps
-										row[9] = 'None'					
-
 
 				
 								# # Add the updated row / list to the output file
