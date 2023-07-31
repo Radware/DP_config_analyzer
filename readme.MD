@@ -269,6 +269,7 @@ V2.6
 	-	Changed "timenow" behavior is taken from main.py and passed to other files
 	-	Cosmetic logging improvements
 	-	Added cust_id while collecting BDOS stats
+	
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
