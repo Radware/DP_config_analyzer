@@ -257,6 +257,18 @@ V2.6
 
 	-	Added collecting and reporting on max average BDOS PPS and PPS Baseline under traffic_stats report
 
+6.0 (7/31/2023)
+	-	Added checking low BDOS baselines (combined from the DP_BDOS_Monitor V3.2.1)
+	-	Added BDOS PPS reporting if BDOS PPS rate exceeds the BDOS PPS baseline for every protocol
+	-	Added new variables under config.py (! Must update config.py file)
+			ANALYZE_BDOS_BASELINES = True # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report
+			HIGH_BDOS_BASELINE_REPORT = False
+			DET_MARGIN_RATIO = 1 #sets the virtual baseline ratio. For example 1 = Virtual baseline is the same as the actual baseline (100% of the actual Normal bassline), 0.3 = 30% etc.
+			DET_ALARM_THRESHOLD = 10 #sets threshold for the number of occurances where the actual traffic went above the Virtual baseline. In case there were more occurrences than the defined threshold, these policies and protocols will be listed in the “low_bdos_baselines.csv”
+			UDP_NBASELINE = 100000 # sets UDP Normal Baseline threhold, below which all policies will be listed
+	-	Changed "timenow" behavior is taken from main.py and passed to other files
+	-	Cosmetic logging improvements
+	-	Added cust_id while collecting BDOS stats
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

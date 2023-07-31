@@ -887,12 +887,13 @@ class Vision:
 		
 		return full_sig_db_dic
 	
-	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict):
+	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict,cust_id):
 
 
 		for dp_ip,dp_attr in full_pol_dic.items():
 			bdos_stats_dict[dp_ip] = {}
 			bdos_stats_dict[dp_ip]['Name'] = dp_attr['Name']
+			bdos_stats_dict[dp_ip]['Customer ID'] = cust_id
 			bdos_stats_dict[dp_ip]['BDOS Report'] = []
 
 			if not dp_attr['Policies']:
@@ -905,13 +906,13 @@ class Vision:
 		return bdos_stats_dict
 
 
-	def getBDOSReportFromVision_PPS(self,dev_ip,dev_attr,full_pol_dic,full_net_dic,bdos_stats_dict_pps):
-
+	def getBDOSReportFromVision_PPS(self,dev_ip,dev_attr,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id):
 
 		for dp_ip,dp_attr in full_pol_dic.items():
 			if dp_ip == dev_ip:
 				bdos_stats_dict_pps[dp_ip] = {}
 				bdos_stats_dict_pps[dp_ip]['Name'] = dp_attr['Name']
+				bdos_stats_dict_pps[dp_ip]['Customer ID'] = cust_id
 				bdos_stats_dict_pps[dp_ip]['BDOS Report'] = []
 
 				if not dp_attr['Policies']:
@@ -924,11 +925,12 @@ class Vision:
 		return bdos_stats_dict_pps
 
 
-	def getDNSReportFromVision(self,full_pol_dic,full_net_dic,dns_stats_dict):
+	def getDNSReportFromVision(self,full_pol_dic,full_net_dic,dns_stats_dict,cust_id):
 
 		for dp_ip,dp_attr in full_pol_dic.items():
 			dns_stats_dict[dp_ip] = {}
 			dns_stats_dict[dp_ip]['Name'] = dp_attr['Name']
+			dns_stats_dict[dp_ip]['Customer ID'] = cust_id
 			dns_stats_dict[dp_ip]['DNS Report'] = []
 
 			if not dp_attr['Policies']:

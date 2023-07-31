@@ -8,7 +8,6 @@ reports_path = cfg.REPORTS_PATH
 raw_data_path = cfg.RAW_DATA_PATH
 requests_path = cfg.REQUESTS_PATH
 
-timenow = time.strftime('%Y%m%d-%H%M')
 
 
 
@@ -353,7 +352,7 @@ def parseBDOSStats():
 								traffic_stats.writerow([f'{dp_ip}' , f'{dp_name}', f'{policy}', row['protection'] , f'BDOS stats returned None', f'Normal BDOS baseline returned None' ,'N/A','N/A', 'N/A','N/A','N/A'])
 
 
-def parseBDOSStats_PPS():
+def parseBDOSStats_PPS(timenow):
 	with open(raw_data_path + 'BDOS_traffic_report_PPS.json') as json_file:
 		bdos_dict_pps = json.load(json_file)
 	
@@ -468,7 +467,7 @@ def parseBDOSStats_PPS():
 			if row[3] == "---All Combined---":
 				csv_writer.writerow(row)
 
-def parseDNSStats():
+def parseDNSStats(timenow):
 	with open(raw_data_path + 'DNS_traffic_report.json') as json_file:
 		dns_dict = json.load(json_file)
 	
@@ -543,7 +542,7 @@ def cleanup():
 		if file.startswith("traffic_stats_temp"):
 			os.remove(reports_path + file)
 
-def parse():
+def parse(timenow):
 
 	cleanup()
 
@@ -558,8 +557,8 @@ def parse():
 	parseTrafficStatsCPS()
 	parseTrafficStatsCEC()
 	parseBDOSStats()
-	parseBDOSStats_PPS()
-	parseDNSStats()
+	parseBDOSStats_PPS(timenow)
+	parseDNSStats(timenow)
 
 	cleanup()
 

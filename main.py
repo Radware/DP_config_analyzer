@@ -10,9 +10,10 @@ import sys
 import os
 import time
 import glob
+import bdos_parser
 
 start_time = time.time()
-
+timenow = time.strftime('%Y%m%d-%H%M')
 
 
 
@@ -79,7 +80,7 @@ for i in sys.argv:
 		nodpconfigparsing = True
 
 
-def get_data_from_vision(key,val):
+def get_data_from_vision(key,val,cust_id= 'None'):
 
 	global full_sig_db_dic
 	global full_pol_dic
@@ -138,16 +139,16 @@ def get_data_from_vision(key,val):
 	if cfg.TRAFFIC_STATS:
 		print(f'Collecting BDOS stats data from Defensepro {key}')
 		logging_helper.logging.info('Collecting BDOS stats data')
-		bdos_stats_dict = v.getBDOSReportFromVision(full_pol_dic,full_net_dic,bdos_stats_dict)
+		bdos_stats_dict = v.getBDOSReportFromVision(full_pol_dic,full_net_dic,bdos_stats_dict,cust_id)
 
 		print(f'Collecting BDOS PPS stats data from Defensepro {key}')
 		logging_helper.logging.info('Collecting BDOS PPS stats data')
-		bdos_stats_dict_pps = v.getBDOSReportFromVision_PPS(key,val,full_pol_dic,full_net_dic,bdos_stats_dict_pps)
+		bdos_stats_dict_pps = v.getBDOSReportFromVision_PPS(key,val,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id)
 	
 
 		print(f'Collecting DNS stats data from Defensepro {key}')
 		logging_helper.logging.info('Collecting DNS stats data')
-		dns_stats_dict = v.getDNSReportFromVision(full_pol_dic,full_net_dic,dns_stats_dict)
+		dns_stats_dict = v.getDNSReportFromVision(full_pol_dic,full_net_dic,dns_stats_dict,cust_id)
 
 		print(f'Collecting Traffic Utilization data (BPS) from Defensepro {key}')
 		logging_helper.logging.info(f'Collecting Traffic Utilization data (BPS) from Defensepro {key}')
@@ -315,7 +316,7 @@ else: #getdatafromvision = True - collect data from vision
 						for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 							if key in dp_list:
 								
-								get_data_from_vision(key,val)
+								get_data_from_vision(key,val,cust_id)
 
 
 				else: #If CUSTOMERS_JSON_CUST_ID_LIST is not empty, collect only the customers defined in the list	
@@ -333,7 +334,7 @@ else: #getdatafromvision = True - collect data from vision
 							for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 								if key in dp_list:
 
-									get_data_from_vision(key,val)
+									get_data_from_vision(key,val,cust_id)
 
 	else: #If customers.json is set to false, use the scope defined in config.py variable "DP_IP_SCOPE_LIST"
 		print('CUSTOMERS_JSON is set to False - collecting data using the scope from DP_IP_SCOPE_LIST')
@@ -346,7 +347,7 @@ else: #getdatafromvision = True - collect data from vision
 
 			for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 
-				get_data_from_vision(key,val)
+				get_data_from_vision(key,val,cust_id= 'None')
 			
 
 		else: #If DP_IP_SCOPE_LIST is defined (not empty), collect all policies for the DefensePro in the list
@@ -357,7 +358,7 @@ else: #getdatafromvision = True - collect data from vision
 
 				if key in cfg.DP_IP_SCOPE_LIST:	
 
-					get_data_from_vision(key,val)
+					get_data_from_vision(key,val,cust_id= 'None')
 
 				else:
 					print(f'Skipping data collection for Defensepro {key} - {val["Name"]}. Not in DP_IP_SCOPE_LIST')
@@ -429,16 +430,30 @@ logging_helper.logging.info('Starting data parsing')
 
 
 if cfg.ANALYZE_CONFIG and not test_email_alarm:
+	logging_helper.logging.info('Starting config analysis')
 	print('Starting config analysis')
-	report.append(DataParser(full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic, full_sig_db_dic).run())
-
+	report.append(DataParser(timenow,full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic, full_sig_db_dic).run())
+	print('DP config analysis is complete')
+	logging_helper.logging.info('DP config analysis is complete')
+	
 if cfg.MAP_CONFIG and not test_email_alarm:
 	print('Starting config mapping')
-	report.append(DataMapper(full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic ).run())
+	report.append(DataMapper(timenow,full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic ).run())
 
 if cfg.TRAFFIC_STATS:
+	
 	logging_helper.logging.info('Parsing traffic/BDOS/DNS data')
-	report.append(traffic_stats_parser.parse())
+	print ('Start parsing traffic/BDOS/DNS data')
+	report.append(traffic_stats_parser.parse(timenow))
+	print ('Parsing traffic/BDOS/DNS data is complete')
+
+if cfg.ANALYZE_BDOS_BASELINES:
+	print('Starting BDOS baselines analysis')
+	logging_helper.logging.info('Starting BDOS baselines analysis')
+	bdos_parser.parse()
+
+	print('BDOS baselines analysis is complete')
+	logging_helper.logging.info('BDOS baselines analysis is complete')
 
 if email:
 	logging_helper.send_report(report)

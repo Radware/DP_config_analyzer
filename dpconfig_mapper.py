@@ -7,7 +7,7 @@ import time
 reports_path = cfg.REPORTS_PATH
 
 class DataMapper():
-	def __init__(self, full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic, full_dnsprofconf_dic, full_synprofconf_dic, full_connlimprofconf_dic,full_oosprofconf_dic):
+	def __init__(self, timenow,full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic, full_dnsprofconf_dic, full_synprofconf_dic, full_connlimprofconf_dic,full_oosprofconf_dic):
 		self.full_pol_dic = full_pol_dic
 		self.full_sig_dic = full_sig_dic
 		self.full_net_dic = full_net_dic
@@ -17,7 +17,7 @@ class DataMapper():
 		self.full_connlimprofconf_dic = full_connlimprofconf_dic
 		self.full_oosprofconf_dic = full_oosprofconf_dic
 		self.na_list = ['']
-		self.timenow = time.strftime('%Y%m%d-%H%M')
+		self.timenow = timenow
 
 
 		with open(reports_path + f'dpconfig_map_{self.timenow}.csv', mode='w', newline="") as dpconfigmap_report:

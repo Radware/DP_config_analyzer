@@ -8,7 +8,7 @@ reports_path = cfg.REPORTS_PATH
 config_path = cfg.CONFIG_PATH
 
 class DataParser():
-	def __init__(self, full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic, full_sig_db_dic):
+	def __init__(self, timenow,full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic, full_sig_db_dic):
 		# with open('ful_pol_dic.txt') as fp:
 		# 	self.full_pol_dic = fp.read()
 		self.full_pol_dic = full_pol_dic
@@ -18,7 +18,7 @@ class DataParser():
 		self.full_synprofconf_dic = full_synprofconf_dic
 		self.full_sig_db_dic = full_sig_db_dic
 		self.parseDict = {}
-		self.timenow = time.strftime('%Y%m%d-%H%M')
+		self.timenow = timenow
 
 		with open(reports_path + f'dpconfig_report_{self.timenow}.csv', mode='w', newline="") as dpconfig_report:
 				bdos_writer = csv.writer(dpconfig_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -223,8 +223,7 @@ class DataParser():
 
 
 		report = reports_path + f'dpconfig_report_{self.timenow}.csv'
-		logging_helper.logging.info('Data parsing is complete')
-		print('Data parsing is complete')
+
 		return report
 
 

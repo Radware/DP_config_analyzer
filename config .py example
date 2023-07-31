@@ -8,7 +8,15 @@ TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePr
 DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
 
 
-MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
+ANALYZE_BDOS_BASELINES = True # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report
+HIGH_BDOS_BASELINE_REPORT = False
+DET_MARGIN_RATIO = 1 #sets the virtual baseline ratio. For example 1 = Virtual baseline is the same as the actual baseline (100% of the actual Normal bassline), 0.3 = 30% etc.
+DET_ALARM_THRESHOLD = 10 #sets threshold for the number of occurances where the actual traffic went above the Virtual baseline. In case there were more occurrences than the defined threshold, these policies and protocols will be listed in the “low_bdos_baselines.csv”
+UDP_NBASELINE = 100000 # sets UDP Normal Baseline threhold, below which all policies will be listed
+
+
+MAP_CONFIG = False # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
+
 
 ################# Proxy settings #################
 
@@ -106,7 +114,6 @@ SSH_TIMEOUT = 5 # DefesePro SSH Timeout in minutes
 SERVICE_AUDITING = 				True # True - Report if Service Auditing is disabled and not in extended mode on the DefensePro, False - do not report if Service Auditing is disabled on the DefensePro
 TELNET_ACCESS_ENABLED = 		True # True - Report if Telnet Access is enabled on the DefensePro, False - do not report if Telnet Access is enabled on the DefensePro
 SIG_SMPL_RATE_DEFAULT = 		True # True - Report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py). False - do not report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py)
-SSH_TIMEOUT_CHECK =				True # True - Report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py), False - do not report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py)
 SIG_SMPL_RATE_CHECK = 			True # True - Report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py), False - do not report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py)
 SIG_LATEST_VER_CHECK = 			True # True - Report if DefensePro signature database is outdated, False - do not report if DefensePro signature database is outdated
 NETCLASS_CHECKS = 				True # True - Run Network Class checks, False - do not run Network Class checks. Network Class checks are:
