@@ -233,6 +233,38 @@ class Vision:
 		
 		return oos_prof_list
 
+
+	def getTFProfileListByDevice(self, dp_ip):
+		# Returns TF profiles
+		policy_url = self.base_url + "/mgmt/device/byip/" + \
+			dp_ip + "/config/rsNewTrafficProfileTable"
+		r = self.sess.get(url=policy_url, verify=False)
+		tf_prof_list = r.json()
+		
+		if tf_prof_list.get("status") == "error":
+			logging.info("Traffic Filter Profile list get error. DefensePro IP: " + dp_ip + ". Error message: " + tf_prof_list['message'])
+			# print("Traffic Filter Profile list get error. DefensePro IP: " + dp_ip + ". Error message: " + tf_prof_list['message'])
+			return []
+		return tf_prof_list
+
+
+	def getTFRulesByDevice(self, dp_ip):
+		# Returns TF rules 
+		url = self.base_url + "/mgmt/device/byip/" + \
+			dp_ip + "/config/rsNewTrafficFilterTable/"
+		r = self.sess.get(url=url, verify=False)
+		tf_prof_rules_list = r.json()
+		
+		if tf_prof_rules_list.get("status") == "error":
+			logging.info("Traffic Filter Profiles parameters get error. DefensePro IP: " + dp_ip + ". Error message: " + tf_prof_rules_list['message'])
+
+			return []
+		return tf_prof_rules_list
+
+
+
+
+
 	def getNetClassListByDevice(self, dp_ip):
 		#Returns Network Class list with networks
 
@@ -887,6 +919,45 @@ class Vision:
 		
 		return full_sig_db_dic
 	
+
+	def getFullTFConfigDictionary(self,dp_ip,val,full_tfprofconf_dic):
+		# Create Full TF Profile config list with all rules dictionary
+
+		full_tfprofconf_dic[dp_ip] = {}
+		full_tfprofconf_dic[dp_ip]['Name'] = val['Name']
+		full_tfprofconf_dic[dp_ip]['Version'] = val['Version']
+
+		tf_prof_list = self.getTFProfileListByDevice(dp_ip)
+		tf_rules_list = self.getTFRulesByDevice(dp_ip)
+
+
+		full_tfprofconf_dic[dp_ip]['Profiles'] = {}
+		
+		if tf_prof_list: #If table is not empty
+
+			for tf_prof in tf_prof_list['rsNewTrafficProfileTable']:
+
+				if full_tfprofconf_dic[dp_ip]['Profiles'].get(tf_prof['rsNewTrafficProfileName']) is None: # If profile name var key does not exist in dictionary, create one with value of empty dictionary
+					full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']] = {}
+
+				# if full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']].get('Action') is None: # If "Action" key does not exist in full TF dictionary, create one with value of empty dictionary
+				full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Action'] = tf_prof['rsNewTrafficProfileAction']
+
+				if full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']].get('Rules') is None: # If "Rules" key does not exist in full TF dictionary, create one with value of empty dictionary
+					full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Rules'] = []
+
+				for tf_rule in tf_rules_list['rsNewTrafficFilterTable']:
+
+					if tf_rule['rsNewTrafficFilterProfileName'] == tf_prof['rsNewTrafficProfileName']:
+						full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Rules'].append(tf_rule)
+
+
+
+
+		return full_tfprofconf_dic
+
+
+
 	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict,cust_id):
 
 

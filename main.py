@@ -98,6 +98,7 @@ def get_data_from_vision(key,val,cust_id= 'None'):
 	global traffic_stats_dict_pps
 	global traffic_stats_dict_cps
 	global traffic_stats_dict_cec
+	global full_tfprofconf_dic
 
 
 	print(f'Collecting policies data from Defensepro {key}')
@@ -135,6 +136,11 @@ def get_data_from_vision(key,val,cust_id= 'None'):
 	print(f'Collecting Signature DB from the Defensepro {key}')
 	logging_helper.logging.info(f'Collecting Signature DB from the Defensepro {key}')
 	full_sig_db_dic = v.getFullSigDB(key,val,full_sig_db_dic)
+
+	print(f'Collecting Traffic Filter configuration data from the Defensepro {key}')
+	logging_helper.logging.info(f'Collecting Traffic Filter configuration data from the Defensepro {key}')
+	full_tfprofconf_dic = v.getFullTFConfigDictionary(key,val,full_tfprofconf_dic)
+
 
 	if cfg.TRAFFIC_STATS:
 		print(f'Collecting BDOS stats data from Defensepro {key}')
@@ -230,6 +236,9 @@ if not getdatafromvision:
 	with open(raw_data_path + 'full_sig_db_dic.json') as full_sig_db_dic_file:
 		full_sig_db_dic = json.load(full_sig_db_dic_file)
 
+	with open(raw_data_path + 'full_tfprofconf_dic.json') as full_tfprofconf_dic_file:
+		full_tfprofconf_dic = json.load(full_tfprofconf_dic_file)
+
 	if cfg.TRAFFIC_STATS:
 
 		with open(raw_data_path + 'BDOS_traffic_report.json') as full_bdos_stats_file:
@@ -265,7 +274,7 @@ else: #getdatafromvision = True - collect data from vision
 	full_connlimprofconf_dic = {}
 	full_oosprofconf_dic = {}
 	full_sig_db_dic = {}
-
+	full_tfprofconf_dic = {}
 	if cfg.TRAFFIC_STATS:
 		bdos_stats_dict = {}
 		dns_stats_dict = {}
@@ -392,6 +401,9 @@ else: #getdatafromvision = True - collect data from vision
 	with open(raw_data_path + 'full_sig_db_dic.json', 'w') as full_sigdb_file:
 		json.dump(full_sig_db_dic,full_sigdb_file)
 
+	with open(raw_data_path + 'full_tfprofconf_dic.json', 'w') as full_tfprofconf_dic_file:
+		json.dump(full_tfprofconf_dic,full_tfprofconf_dic_file)
+
 	if cfg.TRAFFIC_STATS:
 
 		with open(raw_data_path + 'BDOS_traffic_report.json', 'w') as outfile:
@@ -438,7 +450,7 @@ if cfg.ANALYZE_CONFIG and not test_email_alarm:
 	
 if cfg.MAP_CONFIG and not test_email_alarm:
 	print('Starting config mapping')
-	report.append(DataMapper(timenow,full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic ).run())
+	report.append(DataMapper(timenow,full_pol_dic,full_sig_dic,full_net_dic,full_bdosprofconf_dic,full_dnsprofconf_dic,full_synprofconf_dic,full_connlimprofconf_dic, full_oosprofconf_dic,full_tfprofconf_dic ).run())
 
 if cfg.TRAFFIC_STATS:
 	

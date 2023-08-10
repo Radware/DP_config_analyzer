@@ -269,7 +269,12 @@ V2.6
 	-	Changed "timenow" behavior is taken from main.py and passed to other files
 	-	Cosmetic logging improvements
 	-	Added cust_id while collecting BDOS stats
-	
+
+V6.1 (8/10/23)
+	-	New feature - added collecting Traffic Filter Profiles configuration data and added mapping the below fields:
+			1. Traffic filter Action(Block/Report)
+			2. List of all the TF rules including Rule Name, Rule ID, Threshold type(PPS/Kbps) and threhold value
+			
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

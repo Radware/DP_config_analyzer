@@ -7,7 +7,7 @@ import time
 reports_path = cfg.REPORTS_PATH
 
 class DataMapper():
-	def __init__(self, timenow,full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic, full_dnsprofconf_dic, full_synprofconf_dic, full_connlimprofconf_dic,full_oosprofconf_dic):
+	def __init__(self, timenow,full_pol_dic, full_sig_dic, full_net_dic, full_bdosprofconf_dic, full_dnsprofconf_dic, full_synprofconf_dic, full_connlimprofconf_dic,full_oosprofconf_dic,full_tfprofconf_dic):
 		self.full_pol_dic = full_pol_dic
 		self.full_sig_dic = full_sig_dic
 		self.full_net_dic = full_net_dic
@@ -16,6 +16,7 @@ class DataMapper():
 		self.full_synprofconf_dic = full_synprofconf_dic
 		self.full_connlimprofconf_dic = full_connlimprofconf_dic
 		self.full_oosprofconf_dic = full_oosprofconf_dic
+		self.full_tfprofconf_dic = full_tfprofconf_dic
 		self.na_list = ['']
 		self.timenow = timenow
 
@@ -27,7 +28,7 @@ class DataMapper():
 				 'Signature Profile Name','Out of State Profile Name', 'Out of State Block/Report','Out of State Activation Threshold','Out of State Termination Threshold','Out of State Enable SYN-ACK','Anti-Scanning Profile Name', 'EAAF Profile Name',\
 					'Geolocaation Profile','Connection Limit Profile Name','Connection Limit Profile Protections and settings','SYN Flood Protection Profile',\
 						'SYN Flood Profile Action','SYN Flood Network Authentication Method','SYN Flood HTTP Authentication','SYN Flood Protection Settings',\
-							'Traffic Filter Profile Name','BDOS Profile Name','BDOS Profile Block/Report','BDOS Profile Bandwidth','BDOS TCP Quota',\
+							'Traffic Filter Profile Name', 'Traffic Filter Block/Report','Traffic Filter Rules','BDOS Profile Name','BDOS Profile Block/Report','BDOS Profile Bandwidth','BDOS TCP Quota',\
 							'BDOS UDP Quota','BDOS ICMP Quota','BDOS Transparent Optimization','BDOS Packet Reporting','BDOS Learning Suppression',\
 								'BDOS Footprint Strictness','BDOS UDP Packet Rate Detection Sensitivity','BDOS Burst-Attack Protection','DNS Profile Name',\
 									'DNS Block/Report','DNS Expected QPS','DNS Max Allowed QPS','DNS A Status','DNS A Quota','DNS MX Status','DNS MX Quota','DNS PTR Status',\
@@ -144,7 +145,7 @@ class DataMapper():
 
 
 	def map_connlim_profile(self,dp_ip,pol_connlim_prof_name):
-		#This function maps the Out of State profiles to dpconfig_map.csv
+		#This function maps the Connection Limit profiles to dpconfig_map.csv
 		connlim_settings = [] #this will go to csv report
 		connlim_prot_values = ''
 
@@ -284,7 +285,56 @@ class DataMapper():
 							oos_settings.append(oos_ack_allow) # Append Out of State Protection Profile Name
 							
 		return oos_settings
-	
+
+
+	def map_tf_profile(self,dp_ip,pol_tf_prof_name):
+		#This function maps the Traffic Filter to dpconfig_map.csv
+		tf_settings = [] #this will go to csv report
+		tf_rules = ''
+
+		if pol_tf_prof_name == "": # If TF profile is not configured, pad all TF fields with value defined in na_list variable
+			tf_settings.append('')
+			tf_settings = tf_settings + self.na_list 
+			
+		else:
+			for tf_dp_ip, tf_dp_attr in self.full_tfprofconf_dic.items():
+
+				if tf_dp_attr['Profiles']:
+					for tf_prof_key, tf_prof_val in tf_dp_attr['Profiles'].items():
+						tf_prof_name = tf_prof_key
+
+						if dp_ip == tf_dp_ip and pol_tf_prof_name == tf_prof_name:
+
+							tf_settings.append(tf_prof_name) # Append Traffic Filter Protection Profile Name
+
+							############# Traffic Filter Protection Profile Action #############
+
+							if 'Action' in tf_prof_val:
+								if tf_prof_val['Action'] == '1':
+									tf_action = 'Block and Report'
+								if tf_prof_val['Action'] == '0':
+									tf_action = 'Report Only'
+
+							tf_settings.append(tf_action) # Append Traffic Filter Protection Profile Action
+
+							############## Traffic Filters Settings #############
+							if tf_prof_val['Rules']:
+								for tf_prof_rule in tf_prof_val['Rules']:
+
+									if 'rsNewTrafficFilterThresholdUsed' in tf_prof_rule:
+										if tf_prof_rule['rsNewTrafficFilterThresholdUsed'] == '2':
+											tf_threshold_used = 'PPS'
+											tf_threshold = tf_prof_rule['rsNewTrafficFilterThresholdPPS']
+										if tf_prof_rule['rsNewTrafficFilterThresholdUsed'] == '1':
+											tf_threshold_used = 'Kbps'
+											tf_threshold = tf_prof_rule['rsNewTrafficFilterThresholdBPS']
+
+									tf_rules = tf_rules + f'Rule Name: {tf_prof_rule["rsNewTrafficFilterName"]}\r\nProtection ID: {tf_prof_rule["rsNewTrafficFilterID"]}\r\nThrehold({tf_threshold_used}): {tf_threshold}\r\n------\r\n'
+
+							tf_settings.append(tf_rules)
+
+		return tf_settings
+
 	def map_src_net_classes(self,dp_ip,pol_src_net_name):
 		#This function maps the Source networks to dpconfig_map.csv
 		src_net_classes_settings = [] #this will go to csv report
@@ -714,15 +764,11 @@ class DataMapper():
 		############Mapping Traffic Filter Profile##########
 		if 'rsIDSNewRulesProfileTrafficFilters' in policy: # Check if Tfaffic Filter profile is configured
 			pol_tf_prof_name = policy['rsIDSNewRulesProfileTrafficFilters']
-
-			if pol_tf_prof_name == "":
-				policy_settings.append('')
-			else:
-				policy_settings.append(pol_tf_prof_name)
+			policy_settings = policy_settings + self.map_tf_profile(dp_ip,pol_tf_prof_name)
 
 		else:
-			policy_settings.append('N/A in this version')
-		###############################################
+			policy_settings.append('N/A in this version')			
+		###################################################
 
 
 		############Mapping BDOS Profile################
