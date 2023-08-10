@@ -151,7 +151,7 @@ class DataMapper():
 
 		if pol_connlim_prof_name == "": # If Connection Limit profile is not configured, pad all bdos fields with N/A values
 			connlim_settings.append('')
-			connlim_settings = connlim_settings + self.na_list 
+			connlim_settings = connlim_settings + self.na_list
 			
 		else:
 			for connlim_dp_ip, connlim_dp_attr in self.full_connlimprofconf_dic.items():
@@ -294,7 +294,7 @@ class DataMapper():
 
 		if pol_tf_prof_name == "": # If TF profile is not configured, pad all TF fields with value defined in na_list variable
 			tf_settings.append('')
-			tf_settings = tf_settings + self.na_list 
+			tf_settings = tf_settings + self.na_list * 3 
 			
 		else:
 			for tf_dp_ip, tf_dp_attr in self.full_tfprofconf_dic.items():
