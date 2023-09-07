@@ -274,7 +274,10 @@ V6.1 (8/10/23)
 	-	New feature - added collecting Traffic Filter Profiles configuration data and added mapping the below fields:
 			1. Traffic filter Action(Block/Report)
 			2. List of all the TF rules including Rule Name, Rule ID, Threshold type(PPS/Kbps) and threhold value
-			
+
+V6.1.1 (9/7/23)
+	-	Fixed bug when traffic filter has profile but no rules (found by Ali Rios Tovar - bug name Barrie)
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

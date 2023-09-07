@@ -946,10 +946,11 @@ class Vision:
 				if full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']].get('Rules') is None: # If "Rules" key does not exist in full TF dictionary, create one with value of empty dictionary
 					full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Rules'] = []
 
-				for tf_rule in tf_rules_list['rsNewTrafficFilterTable']:
+				if tf_rules_list:
+					for tf_rule in tf_rules_list['rsNewTrafficFilterTable']:
 
-					if tf_rule['rsNewTrafficFilterProfileName'] == tf_prof['rsNewTrafficProfileName']:
-						full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Rules'].append(tf_rule)
+						if tf_rule['rsNewTrafficFilterProfileName'] == tf_prof['rsNewTrafficProfileName']:
+							full_tfprofconf_dic[dp_ip]['Profiles'][tf_prof['rsNewTrafficProfileName']]['Rules'].append(tf_rule)
 
 
 
