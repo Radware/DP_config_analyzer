@@ -294,7 +294,7 @@ class DataMapper():
 
 		if pol_tf_prof_name == "": # If TF profile is not configured, pad all TF fields with value defined in na_list variable
 			tf_settings.append('')
-			tf_settings = tf_settings + self.na_list * 3 
+			tf_settings = tf_settings + self.na_list * 2
 			
 		else:
 			for tf_dp_ip, tf_dp_attr in self.full_tfprofconf_dic.items():
