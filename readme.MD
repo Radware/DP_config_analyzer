@@ -278,6 +278,12 @@ V6.1 (8/10/23)
 V6.1.1 (9/7/23)
 	-	Fixed bug when traffic filter has profile but no rules (found by Ali Rios Tovar - bug name Barrie)
 
+V6.2
+	-	TF mapping, added mapping Tracking type
+
+V6.2.1
+	-	Finished mappping all TF settings
+	
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

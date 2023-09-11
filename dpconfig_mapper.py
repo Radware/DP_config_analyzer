@@ -321,15 +321,204 @@ class DataMapper():
 							if tf_prof_val['Rules']:
 								for tf_prof_rule in tf_prof_val['Rules']:
 
-									if 'rsNewTrafficFilterThresholdUsed' in tf_prof_rule:
+									tf_rules += f'Rule Name: {tf_prof_rule["rsNewTrafficFilterName"]}'
+									tf_rules += f'\r\nProtection ID: {tf_prof_rule["rsNewTrafficFilterID"]}'
+
+									# FILTER MODE
+									if 'rsNewTrafficFilterMatchCriteria' in tf_prof_rule: # Apply Traffic Filter To:
+										if tf_prof_rule['rsNewTrafficFilterMatchCriteria'] == '1':
+											tf_match = 'Matching Traffic'							
+										if tf_prof_rule['rsNewTrafficFilterMatchCriteria'] == '2':
+											tf_match = 'Non-Matching Traffic'
+											tf_rules += f'\r\nApply Traffic Filter To: {tf_match}'	
+
+									# BASIC FILTER CRITERIA
+
+									if 'rsNewTrafficFilterSrcNetwork' in tf_prof_rule: # Source Network:
+										if tf_prof_rule['rsNewTrafficFilterSrcNetwork'] != 'As in Policy':
+											tf_src_net = tf_prof_rule['rsNewTrafficFilterSrcNetwork']						
+											tf_rules += f'\r\nSource Network: {tf_src_net}'
+
+									if 'rsNewTrafficFilterDstNetwork' in tf_prof_rule: # Destination Network:
+										if tf_prof_rule['rsNewTrafficFilterDstNetwork'] != 'As in Policy':
+											tf_dst_net = tf_prof_rule['rsNewTrafficFilterDstNetwork']						
+											tf_rules += f'\r\nDestination Network: {tf_dst_net}'
+
+
+									if 'rsNewTrafficFilterProtocol' in tf_prof_rule: #Protocol:
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '0':
+											tf_protocol = 'Any Supported Protocol'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '1':
+											tf_protocol = 'TCP'
+
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '2':
+											tf_protocol = 'UDP'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '3':
+											tf_protocol = 'ICMP'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '4':
+											tf_protocol = 'IGMP'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '6':
+											tf_protocol = 'ICMPv6'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '7':
+											tf_protocol = 'GRE'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '8':
+											tf_protocol = 'IP-in-IP'
+										if tf_prof_rule['rsNewTrafficFilterProtocol'] == '9':
+											tf_protocol = f'Other Protocol(s) (Protocol Number: {tf_prof_rule["rsNewTrafficFilterProtocol"]})'
+
+										tf_rules += f'\r\nProtocol: {tf_protocol}'
+
+
+									if 'rsNewTrafficFilterSrcPort' in tf_prof_rule: # Source Port:
+										if tf_prof_rule['rsNewTrafficFilterSrcPort'] != 'Any':
+											tf_src_port = tf_prof_rule['rsNewTrafficFilterSrcPort']						
+											tf_rules += f'\r\nSource Port: {tf_src_port}'
+
+									if 'rsNewTrafficFilterDstPort' in tf_prof_rule: # Destination Port:
+										if tf_prof_rule['rsNewTrafficFilterDstPort'] != 'Any':
+											tf_dst_port = tf_prof_rule['rsNewTrafficFilterDstPort']						
+											tf_rules += f'\r\nDestination Port: {tf_dst_port}'
+
+									if 'rsNewTrafficFilterPacketSize' in tf_prof_rule: # Packet size:
+										if tf_prof_rule['rsNewTrafficFilterPacketSize'] != '':
+											tf_packet_size = tf_prof_rule['rsNewTrafficFilterPacketSize']						
+											tf_rules += f'\r\nPacket Size: {tf_packet_size}'
+
+									# ADVANCED FILTER CRITERIA
+
+										###################### TCP Flags #################################
+
+									tf_tcp_flags = []
+
+
+									if 'rsNewTrafficFilterTCPFlagsSyn' in tf_prof_rule: # SYN Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsSyn'] == '1':
+											tf_tcp_flags.append('SYN')
+									if 'rsNewTrafficFilterTCPFlagsAck' in tf_prof_rule: # ACK Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsAck'] == '1':
+											tf_tcp_flags.append('ACK')
+									if 'rsNewTrafficFilterTCPFlagsRst' in tf_prof_rule: # RST Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsRst'] == '1':
+											tf_tcp_flags.append('RST')		
+									if 'rsNewTrafficFilterTCPFlagsSynAck' in tf_prof_rule: # SYN+ACK Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsSynAck'] == '1':
+											tf_tcp_flags.append('SYN+ACK')		
+									if 'rsNewTrafficFilterTCPFlagsFinAck' in tf_prof_rule: # FIN+ACK Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsFinAck'] == '1':
+											tf_tcp_flags.append('FIN+ACK')		
+									if 'rsNewTrafficFilterTCPFlagsPshAck' in tf_prof_rule: # PSH+ACK Enabled:
+										if tf_prof_rule['rsNewTrafficFilterTCPFlagsPshAck'] == '1':
+											tf_tcp_flags.append('PSH+ACK')	
+
+									if tf_tcp_flags:
+
+										tf_rules += f'\r\nTCP Flags: {(", ".join(map(str, tf_tcp_flags)))}'
+
+
+									if 'rsNewTrafficFilterTTL' in tf_prof_rule: # Context Tag:
+										if tf_prof_rule['rsNewTrafficFilterTTL'] != '':
+											tf_ttl = tf_prof_rule['rsNewTrafficFilterTTL']						
+											tf_rules += f'\r\nTime to Live (TTL): {tf_ttl}'
+
+									if 'rsNewTrafficFilterVLAN' in tf_prof_rule: # Context Tag:
+										if tf_prof_rule['rsNewTrafficFilterVLAN'] != 'Any':
+											tf_context_tag = tf_prof_rule['rsNewTrafficFilterVLAN']						
+											tf_rules += f'\r\nContext Tag: {tf_context_tag}'
+
+
+									if 'rsNewTrafficFilterFragOffset' in tf_prof_rule: # Fragment Offset:
+										if tf_prof_rule['rsNewTrafficFilterFragOffset'] != '':
+											tf_frag_offset = tf_prof_rule['rsNewTrafficFilterFragOffset']						
+											tf_rules += f'\r\nFragment Offset: {tf_frag_offset}'
+
+									if 'rsNewTrafficFilterSequenceNum' in tf_prof_rule: # TCP Sequence Number:
+										if tf_prof_rule['rsNewTrafficFilterSequenceNum'] != '':
+											tf_seq_num = tf_prof_rule['rsNewTrafficFilterSequenceNum']						
+											tf_rules += f'\r\nTCP Sequence Number: {tf_seq_num}'
+
+									if 'rsNewTrafficFilterTOS' in tf_prof_rule: # Type of Service (ToS) / DSCP:
+										if tf_prof_rule['rsNewTrafficFilterTOS'] != '':
+											tf_tos = tf_prof_rule['rsNewTrafficFilterTOS']						
+											tf_rules += f'\r\nType of Service (ToS) / DSCP: {tf_tos}'
+
+									if 'rsNewTrafficFilterFragId' in tf_prof_rule: # Fragment ID:
+										if tf_prof_rule['rsNewTrafficFilterFragId'] != '':
+											tf_frag_id = tf_prof_rule['rsNewTrafficFilterFragId']						
+											tf_rules += f'\r\nFragment ID: {tf_frag_id}'
+
+									if 'rsNewTrafficFilterRegex' in tf_prof_rule: # Regular Expression:
+										if tf_prof_rule['rsNewTrafficFilterRegex'] != '':
+											tf_reg_exp = tf_prof_rule['rsNewTrafficFilterRegex']						
+											tf_rules += f'\r\nRegular Expression: {tf_reg_exp}'
+
+
+
+									# FILTER THRESHOLD
+
+
+									if 'rsNewTrafficFilterThresholdUsed' in tf_prof_rule: # Threshold
 										if tf_prof_rule['rsNewTrafficFilterThresholdUsed'] == '2':
 											tf_threshold_used = 'PPS'
 											tf_threshold = tf_prof_rule['rsNewTrafficFilterThresholdPPS']
 										if tf_prof_rule['rsNewTrafficFilterThresholdUsed'] == '1':
 											tf_threshold_used = 'Kbps'
 											tf_threshold = tf_prof_rule['rsNewTrafficFilterThresholdBPS']
+										tf_rules += f'\r\nThrehold({tf_threshold_used}): {tf_threshold}'
 
-									tf_rules = tf_rules + f'Rule Name: {tf_prof_rule["rsNewTrafficFilterName"]}\r\nProtection ID: {tf_prof_rule["rsNewTrafficFilterID"]}\r\nThrehold({tf_threshold_used}): {tf_threshold}\r\n------\r\n'
+
+									if 'rsNewTrafficFilterAttackTrackingType' in tf_prof_rule: # Tracking Mode
+
+										if tf_prof_rule['rsNewTrafficFilterAttackTrackingType'] == '0':
+											tf_tracking_mode = 'All'
+										if tf_prof_rule['rsNewTrafficFilterAttackTrackingType'] == '2':
+											tf_tracking_mode = 'Per Source'										
+										if tf_prof_rule['rsNewTrafficFilterAttackTrackingType'] == '3':
+											tf_tracking_mode = 'Per Destination'
+										if tf_prof_rule['rsNewTrafficFilterAttackTrackingType'] == '4':
+											tf_tracking_mode = 'Per Source and Destination Pair'
+										if tf_prof_rule['rsNewTrafficFilterAttackTrackingType'] == '5':
+											tf_tracking_mode = 'Track Returning Traffic from Destination and Suspend Corresponding Sources'
+
+										tf_rules = tf_rules + f'\r\nTracking Mode: {tf_tracking_mode}'
+
+
+									# Source Prefix Length
+
+									if 'rsNewTrafficFilterSrcSubPrefixIPv4' in tf_prof_rule: # Source Prefix Length IPv4:
+										if tf_prof_rule['rsNewTrafficFilterSrcSubPrefixIPv4'] != '32':
+											tf_src_prefix = tf_prof_rule['rsNewTrafficFilterSrcSubPrefixIPv4']						
+											tf_rules += f'\r\nSource Prefix Length IPv4: {tf_src_prefix}'
+
+									if 'rsNewTrafficFilterSrcSubPrefixIPv6' in tf_prof_rule: # Source Prefix Length IPv6:
+										if tf_prof_rule['rsNewTrafficFilterSrcSubPrefixIPv6'] != '128':
+											tf_src_prefix_ipv6 = tf_prof_rule['rsNewTrafficFilterSrcSubPrefixIPv6']						
+											tf_rules += f'\r\nSource Prefix Length IPv6: {tf_src_prefix_ipv6}'
+
+
+									if 'rsNewTrafficFilterDstSubPrefixIPv4' in tf_prof_rule: # Destination Prefix Length IPv4:
+										if tf_prof_rule['rsNewTrafficFilterDstSubPrefixIPv4'] != '32':
+											tf_dst_prefix = tf_prof_rule['rsNewTrafficFilterDstSubPrefixIPv4']						
+											tf_rules += f'\r\nDestination Prefix Length IPv4: {tf_dst_prefix}'
+
+									if 'rsNewTrafficFilterDstSubPrefixIPv6' in tf_prof_rule: # Destination Prefix Length IPv6:
+										if tf_prof_rule['rsNewTrafficFilterDstSubPrefixIPv6'] != '128':
+											tf_dst_prefix_ipv6 = tf_prof_rule['rsNewTrafficFilterDstSubPrefixIPv6']						
+											tf_rules += f'\r\nDestination Prefix Length IPv6: {tf_dst_prefix_ipv6}'
+
+									# REPORTING SETTINGS
+
+									if 'rsNewTrafficFilterPacketReport' in tf_prof_rule: #Packet Reporting
+										if tf_prof_rule['rsNewTrafficFilterPacketReport'] == '1':
+											tf_packet_reporting = 'Enabled'
+										if tf_prof_rule['rsNewTrafficFilterPacketReport'] == '2':
+											tf_packet_reporting = 'Disabled'
+
+										tf_rules += f'\r\nPacket Reporting: {tf_packet_reporting}'
+
+									tf_rules += '\r\n------\r\n'
+
+									print(tf_rules)
+
 
 							tf_settings.append(tf_rules)
 
