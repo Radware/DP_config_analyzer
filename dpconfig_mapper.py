@@ -1011,7 +1011,7 @@ class DataMapper():
 	
 
 
-		report = reports_path + 'dpconfig_mapper.csv'
+		report = reports_path + f'dpconfig_map_{self.timenow}.csv'
 		logging_helper.logging.info('Config mapping is complete')
 		print('Config mapping is complete')
 

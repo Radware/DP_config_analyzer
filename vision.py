@@ -29,7 +29,12 @@ class Vision:
 		#self.internet_connectivity = self.InternetConnectivity()
 		
 		self.all_subscriptions = self.getAllSubscriptionsVision()
-		self.latest_sig_db = self.all_subscriptions[0]["lastrelease"]
+
+		try:
+			self.latest_sig_db = self.all_subscriptions[0]["lastrelease"]
+		except:
+			self.latest_sig_db = "N/A"
+			
 		logging.info('Collecting DefensePro device list')
 		print('Collecting DefensePro device list')		
 		self.device_list = self.getDeviceList()

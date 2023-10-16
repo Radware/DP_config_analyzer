@@ -283,6 +283,12 @@ V6.2
 
 V6.2.1 (9/11/23)
 	-	Finished mappping all TF settings
+
+V6.2.2 (10/16/23)
+	-	Bugfixes 
+			- sending email for traffic_stats 
+			- sending email for dpconfig_map
+			- setting signature version file to "N/A" if Vision does not have the internet to fetch it.
 	
 # Functionality to be added:
 

@@ -562,5 +562,5 @@ def parse(timenow):
 
 	cleanup()
 
-	report = reports_path + "traffic_stats.csv"
+	report = reports_path + f"traffic_stats_{timenow}.csv"
 	return report
