@@ -29,7 +29,7 @@ class DataMapper():
 					'Geolocaation Profile','Connection Limit Profile Name','Connection Limit Profile Protections and settings','SYN Flood Protection Profile',\
 						'SYN Flood Profile Action','SYN Flood Network Authentication Method','SYN Flood HTTP Authentication','SYN Flood Protection Settings',\
 							'Traffic Filter Profile Name', 'Traffic Filter Block/Report','Traffic Filter Rules','BDOS Profile Name','BDOS Profile Block/Report','BDOS Profile Bandwidth','BDOS TCP Quota',\
-							'BDOS UDP Quota','BDOS ICMP Quota','BDOS Transparent Optimization','BDOS Packet Reporting','BDOS Learning Suppression',\
+							'BDOS UDP Quota','BDOS UDP-Frag Quota','BDOS ICMP Quota','BDOS Transparent Optimization','BDOS Packet Reporting','BDOS Learning Suppression',\
 								'BDOS Footprint Strictness','BDOS UDP Packet Rate Detection Sensitivity','BDOS Burst-Attack Protection','DNS Profile Name',\
 									'DNS Block/Report','DNS Expected QPS','DNS Max Allowed QPS','DNS A Status','DNS A Quota','DNS MX Status','DNS MX Quota','DNS PTR Status',\
 									'DNS PTR Quota','DNS AAAA Status','DNS AAAA Quota','DNS Text Status','DNS Text Quota','DNS SOA Status','DNS SOA Quota','DNS Naptr Status',\
@@ -66,11 +66,11 @@ class DataMapper():
 
 
 	def map_synp_profile(self,dp_ip,pol_synp_prof_name):
-		#This function maps the bdos profiles to dpconfig_map.csv
+		#This function maps the SYNP profiles to dpconfig_map.csv
 		synp_settings = []
 		synp_prot_values = ''
 
-		if pol_synp_prof_name == "": # If SYNP profile is not configured, pad all bdos fields with N/A values
+		if pol_synp_prof_name == "": # If SYNP profile is not configured, pad all SYNP fields with N/A values
 			synp_settings.append('')
 			synp_settings = synp_settings + self.na_list *4
 			
@@ -149,7 +149,7 @@ class DataMapper():
 		connlim_settings = [] #this will go to csv report
 		connlim_prot_values = ''
 
-		if pol_connlim_prof_name == "": # If Connection Limit profile is not configured, pad all bdos fields with N/A values
+		if pol_connlim_prof_name == "": # If Connection Limit profile is not configured, pad all Connlim fields with N/A values
 			connlim_settings.append('')
 			connlim_settings = connlim_settings + self.na_list
 			
@@ -225,7 +225,7 @@ class DataMapper():
 		#This function maps the Out of State profiles to dpconfig_map.csv
 		oos_settings = [] #this will go to csv report
 
-		if pol_oos_prof_name == "": # If Out of State profile is not configured, pad all bdos fields with N/A values
+		if pol_oos_prof_name == "": # If Out of State profile is not configured, pad all oos fields with N/A values
 			oos_settings.append('')
 			oos_settings = oos_settings + self.na_list*4
 			
@@ -517,7 +517,6 @@ class DataMapper():
 
 									tf_rules += '\r\n------\r\n'
 
-									print(tf_rules)
 
 
 							tf_settings.append(tf_rules)
@@ -564,7 +563,7 @@ class DataMapper():
 
 		if pol_bdos_prof_name == "": # If BDOS profile is not configured, pad all bdos fields with N/A values
 			bdos_settings.append('')
-			bdos_settings = bdos_settings + self.na_list *11
+			bdos_settings = bdos_settings + self.na_list *12
 			
 
 		for bdos_dp_ip, bdos_dp_attr in self.full_bdosprofconf_dic.items():
@@ -589,7 +588,9 @@ class DataMapper():
 						bdos_settings.append(bdos_prof['rsNetFloodProfileBandwidthIn']) # Bandwidth
 						bdos_settings.append(bdos_prof['rsNetFloodProfileTcpInQuota'])
 						bdos_settings.append(bdos_prof['rsNetFloodProfileUdpInQuota'])
+						bdos_settings.append(bdos_prof['rsNetFloodProfileUdpFragInQuota'])
 						bdos_settings.append(bdos_prof['rsNetFloodProfileIcmpInQuota'])
+						
 
 						########## BDOS Transparent optimization check#########
 						if 'rsNetFloodProfileTransparentOptimization' in bdos_prof:

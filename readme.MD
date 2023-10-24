@@ -289,7 +289,10 @@ V6.2.2 (10/16/23)
 			- sending email for traffic_stats 
 			- sending email for dpconfig_map
 			- setting signature version file to "N/A" if Vision does not have the internet to fetch it.
-	
+
+V6.2.3
+	- Added mapping UDP-Frag
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file
