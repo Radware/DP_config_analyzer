@@ -6,6 +6,7 @@ VISION_VER = 4.85 # APSolute Vision version
 
 TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics
 DURATION = 1 # sets the time frame in days for the traffic stats, BDOS, DNS data collection period
+MAX_POINTS = -10 #sets the number of top max values for calculating maximum average
 
 
 ANALYZE_BDOS_BASELINES = True # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report

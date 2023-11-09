@@ -293,6 +293,9 @@ V6.2.2 (10/16/23)
 V6.2.3
 	- Added mapping UDP-Frag
 
+V6.2.4
+	- config.py and traffic_stats_parser.py - added configurable variable AVG_POINTS
+
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

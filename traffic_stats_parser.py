@@ -46,7 +46,7 @@ def parseTrafficStatsBPS():
 
 				if len(currthroughput_list) and sum(currthroughput_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 					# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
-					top_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
+					top_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[cfg.MAX_POINTS:]
 					top_currthroughput_list = [currthroughput_list[i] for i in top_currthroughput_idx]
 				
 					top_currthroughput_avg = ((sum(top_currthroughput_list)) / (len(top_currthroughput_list)))*1.1
@@ -150,7 +150,7 @@ def parseTrafficStatsPPS():
 				if len(currthroughput_list):
 					if sum(currthroughput_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 						# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
-						top_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
+						top_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[cfg.MAX_POINTS:]
 						top_currthroughput_list = [currthroughput_list[i] for i in top_currthroughput_idx]
 					
 						top_currthroughput_avg = (sum(top_currthroughput_list)) / (len(top_currthroughput_list))
@@ -201,7 +201,7 @@ def parseTrafficStatsCPS():
 				if len(currcps_list): # if current throughput list per stamplist is not empty, calculate average throughput
 					if sum(currcps_list) !=0:
 						# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
-						top_currcps_idx = sorted(range(len(currcps_list)), key=lambda i: currcps_list[i])[-10:]
+						top_currcps_idx = sorted(range(len(currcps_list)), key=lambda i: currcps_list[i])[cfg.MAX_POINTS:]
 						top_currcps_list = [currcps_list[i] for i in top_currcps_idx]
 					
 						top_currcps_avg = (sum(top_currcps_list)) / (len(top_currcps_list))
@@ -254,7 +254,7 @@ def parseTrafficStatsCEC():
 
 			if len(currcec_list) and sum(currcec_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 				# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
-				top_currcec_idx = sorted(range(len(currcec_list)), key=lambda i: currcec_list[i])[-10:]
+				top_currcec_idx = sorted(range(len(currcec_list)), key=lambda i: currcec_list[i])[cfg.MAX_POINTS:]
 				top_currcec_list = [currcec_list[i] for i in top_currcec_idx]
 			
 				top_currcps_avg = (sum(top_currcec_list)) / (len(top_currcec_list))
@@ -323,7 +323,7 @@ def parseBDOSStats():
 					if len(currthroughput_list) and sum(currthroughput_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 						# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
 
-						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
+						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[cfg.MAX_POINTS:]
 						top_10_currthroughput_list = [currthroughput_list[i] for i in top_10_currthroughput_idx]
 				
 						top10_currthroughput_avg = (sum(top_10_currthroughput_list)) / (len(top_10_currthroughput_list))
@@ -396,7 +396,7 @@ def parseBDOSStats_PPS(timenow):
 					if len(currthroughput_list) and sum(currthroughput_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 						# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
 
-						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
+						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[cfg.MAX_POINTS:]
 						top_10_currthroughput_list = [currthroughput_list[i] for i in top_10_currthroughput_idx]
 
 						
@@ -513,7 +513,7 @@ def parseDNSStats(timenow):
 					if len(currthroughput_list) and sum(currthroughput_list) !=0: # if current throughput list per stamplist is not empty, calculate average throughput
 						# currthroughput_avg = (sum(currthroughput_list)) / (len(currthroughput_list))
 
-						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[-10:]
+						top_10_currthroughput_idx = sorted(range(len(currthroughput_list)), key=lambda i: currthroughput_list[i])[cfg.MAX_POINTS:]
 						top_10_currthroughput_list = [currthroughput_list[i] for i in top_10_currthroughput_idx]
 				
 						top10_currthroughput_avg = (sum(top_10_currthroughput_list)) / (len(top_10_currthroughput_list))
