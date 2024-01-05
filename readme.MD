@@ -296,6 +296,10 @@ V6.2.3
 V6.2.4
 	- config.py and traffic_stats_parser.py - added configurable variable AVG_POINTS
 
+V6.2.4.1
+	- config.py example
+		Reorganized
+		
 # Functionality to be added:
 
 - Add full configuration mapping with thresholds to a separate file

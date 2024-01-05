@@ -1,0 +1,202 @@
+############################################################################################################################################
+############################################ Mandataory Variables ##########################################################################
+############################################################################################################################################VISION_IP = "1.1.1.2" # APSolute Vision IP
+
+VISION_USER = "radware" # APSolute Vision username
+VISION_PASS = "radware" # APSolute Vision password
+VISION_VER = 4.85 # APSolute Vision version
+
+
+
+#################  Data collection Scope  #################
+
+# DefensePro scope can be defined in one of the two ways:
+
+# Either 1. Define scope in customers.json file (customers_example.json is attached, rename to customers.json)
+
+CUSTOMERS_JSON = False # True - scope for the data collection will be defined from "customers.json" file, False - scope will be defined using config.py variable "DP_IP_SCOPE_LIST"
+CUSTOMERS_JSON_CUST_ID_LIST = [] # List of customer IDs to collect data for, comma separated, example ['Customer A','Customer B']. If empty [] - collect data for all customers defined in customers.json file
+
+# Or 2. Define below variable "DP_IP_SCOPE_LIST" with the list of DP IP's
+
+DP_IP_SCOPE_LIST = ['10.105.192.30','10.105.192.34'] # List of DefensePro IP addresses to analyze, comma separated, example ['1.1.1.2','1.1.1.3']. if empty []- analyze all DefensePro in Vision
+
+
+############################################################################################################################################
+############################################ Report 1 and 2 (Optional)######################################################################
+############################################ Traffic Statistics Report and low bdos baselines report(Optional)  ############################
+############################################################################################################################################
+# Traffic Statistics will create a report in csv format and includes highest traffic utilization average for the configurable historical timeframe in days (default is 1 days) for every policy including the following stats
+#	CPS = Connections Per Second per policy per DefensePro
+#	PPS = Packets Per Second per policy per DefensePro
+#	BPS = Traffic utilization in Mbps per policy per DefensePro
+#	BDOS protected protocols and Normal baseline BPS per policy per DefensePro
+#	DNS protected record types and Normal baseline QPS per policy per DefensePro
+#	CEC = Concurrent established Connections per DefensePro All policies combined
+
+# This report helps to understand volume of the traffic and make threshold based tuning decisions (BDOS, connection limit, traffic filter)
+# Report will be created under /Reports directory. Example /Reports/traffic_stats_20231227-1415.csv
+
+TRAFFIC_STATS = False # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics
+DURATION = 1# sets the time frame in days for the traffic stats, BDOS, DNS data collection period
+MAX_POINTS = -10 #sets the number of top max values for calculating maximum average
+
+
+# Low bdos baselines report will create a csv report which includes policies that traffic is above normal baselines and tuning is required
+
+ANALYZE_BDOS_BASELINES = False # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report
+DET_MARGIN_RATIO = 1 #sets the virtual baseline ratio to set alert threshold lower than Normal baseline. For example 1 = Virtual baseline is the same as the actual normal baseline (100% of the actual Normal bassline). 0.7 sets the alert to trigger the alert if traffic reaches 70% of the Normal baseline.
+DET_ALARM_THRESHOLD = 10 #sets threshold for the number of occurances where the actual traffic went above the Virtual baseline. In case there were more occurrences than the defined threshold, these policies and protocols will be listed in the “low_bdos_baselines.csv”
+UDP_NBASELINE = 100000 # Show policies which has normal baselines set lower than 100Mbps in this example (optional)
+
+############################################################################################################################################
+############################################ Report 3 (Optional)############################################################################
+############################################ Configuration mapping report(Optional)  #######################################################
+############################################################################################################################################
+# This report DefensePro Configuration mapping in csv format.
+
+MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
+
+############################################################################################################################################
+############################################ Report 4 (Optional)############################################################################
+############################################ Best practice configuration report(Optional)  #################################################
+############################################################################################################################################
+# This report will check DP configuration and create report when configuration does not comply with best practice. Below checks are included
+
+#	- 1.  DefensePro has no catchall policy
+#	- 2.  Policy has no security profiles applied
+#	- 3.  Policy is configured two-way
+#	- 4.  Policy is in report mode
+#	- 5.  Policy is disabled
+#	- 6.  Packet reporting is disabled
+#	- 7.  Policy has no BDOS profile applied
+#	- 8.  Policy has no Signature profile applied
+#	- 9.  Signature profile applied on the policy does not include all DoS-All rules
+#	- 10. DNS Signature profile applied on the DNS policy does not include all DoS-All rules and DNS Services Signatures
+#	- 11. Policy has no Out of state profile applied
+#	- 12. Policy has no Connection Limit applied
+#	- 13. Policy has no SYN Flood profile applied
+#	- 14. Policy has no ERT Active Attacker Feed profile applied
+#	- 15. DefensePro has no Heartbeat policy for the Silicom Bypass Switch (if exists)
+#	- 16. Catchall policy has not the lowest priority
+#	- 17. Policies distribution across instances is not equal for DefensePro version 7.x 
+#	- 18. BDOS profile is in report mode
+#	- 19. BDOS profile is not applied on any policy(orphaned)
+#	- 20. BDOS profile has Footprint Strictness is not set to Medium 
+#	- 21. BDOS profile learning suppression is less than 50%
+#	- 22. SSH Timeout
+#	- 23. Configuration audit is enabled
+#	- 24. Configuration audit type extended is enabled
+#	- 25. Management access through HTTP is disabled
+#	- 26. Management access through Telnet is disabled
+#	- 27. Web-services is disabled if unnecessary.
+#	- 28. Network class parsing 
+#	-     a. Network class is a subnet of another network class
+#	-     b. Network class is unused(orphaned)
+#	-     c. Same network class is shared with antoher policy
+#    d. Network class has a duplicate network with another network class
+
+ANALYZE_CONFIG = True # True - Analyze DefensePro configuration to /Reports/dpconfig_report.csv, False - don't analyze configuration 
+
+ALL_CHECKS = False # True - Run all checks and override all checks defined below, False - Run only checks defined below
+
+POLICY_NO_PROFILES =			True # True - Report if DefensePro policy does not have any profiles applied. False - do not report if DefensePro policy does not have any profiles applied
+POLICY_TWO_WAY = 				True # True - Report if DefensePro policy is configued in two-way mode. False - do not report if DefensePro policy is configued in two-way mode
+POLICY_REPORT_MODE = 			True # True - Report if DefensePro policy is configued in report mode. False - do not report if DefensePro policy is configued in report mode
+POLICY_DISABLED = 				True # True - Report if DefensePro policy is configued in disabled mode. False - do not report if DefensePro policy is configued in disabled mode
+POLICY_PACKET_REPORTING = 		True # True - Report if DefensePro packet reporting is disabled on the policy. False - do not report if DefensePro packet reporting is disabpled on the policy
+POLICY_BDOS_PROF = 				True # True - Report if BDOS profile is not applied on the DefensePro policy. False - do not report if BDOS profile is not applied on the DefensePro policy
+POLICY_SIG_PROF = 				True # True - Report if Signature profile is not applied on the DefensePro policy. False - do not report if Signature profile is not applied on the DefensePro policy
+POLICY_SIG_DOSALL = 			True # True - Report if Signature profile does not have all Dos-All rules. False - do not report if Signature profile does not have all Dos-All rules
+POLICY_OOS_PROF = 				True # True - Report if Out of State profile is not applied on the DefensePro policy. False - do not report if Out of State profile is not applied on the DefensePro policy
+POLICY_CONNLIM_PROF =			True # True - Report if Connection Limit profile is not applied on the DefensePro policy. False - do not report if Connection Limit profile is not applied on the DefensePro policy
+POLICY_SYNP_PROF = 				True # True - Report if SYN Protection profile is not applied on the DefensePro policy. False - do not report if SYN Protection profile is not applied on the DefensePro policy
+POLICY_EAAF_PROF = 				True # True - Report if EAAF profile is not applied on the DefensePro policy. False - do not report if EAAF profile is not applied on the DefensePro policy
+POLICY_DNS_PROF = 				True # True - Report if DNS profile on the DNS policy does not have the DNS Services Signature + DOS-All rules. False - do not report if DNS profile on the DNS policy does not have the DNS Services Signature + DOS-All rules.
+POLICY_CATCHALL_LAST = 			True # True - Report if Catch-All rule is not the last rule in the DefensePro policy. False - do not report if Catch-All rule is not the last rule in the DefensePro policy
+BDOS_PROF_CHECKS = 				True # True - Run BDOS profile checks, False - do not run BDOS profile checks. BDOS profile checks are: 
+										# BDOS profiles is in Report-Only mode
+										# Footprint Strictness is not Medium
+										# Learning suppression is set not to the configured value(defined as "BDOS_LST" in config.py)
+										# UDP Packet Rate Detection Sensitivity is not set to Low/Ignore
+										# Check if all BDOS supported prootocols are enabled for BDOS inspection
+										# Inbound or outbound BDOS bandwidth is configured below the configured threshold (defined as "BDOS_BW_IN" and "BDOS_BW_OUT" in config.py)
+										# Burst-Attack Protection" is disabled
+										# BDOS Profile is not applied on any policy (orphaned)
+SYNP_PROF_CHECKS = 				True # True - Run SYN Protection profile checks, False - do not run SYN Protection profile checks. SYN Protection profile checks are:
+										# SYN FLood Profile is in Report-Only mode
+										# SYN Flood Profile is not applied on any policy (orphaned)
+BYPASS_SWITCH = 				False # True - DefensePro is deployed with Silicom bypass switch, report if DefensePro does not have a heartbeat policy for the Silicom bypass switch, False - DefensePro is deployed without bypass switch
+NO_CATCHALL_POL = 				True # True - Report if DefensePro does not have a Catch-All policy, False - do not report if DefensePro does not have a Catch-All policy
+DP_V7_EVEN_INSTANCE = 			True # True - Report if DefensePro version 7.x instances are not evenly distributed across the policies. False - do not report if DefensePro version 7.x instances are not evenly distributed across the policies.
+WEB_SERVICES_ACCESS_ENABLED = 	True # True - Report if Web Services Access is enabled on the DefensePro, False - do not report if Web Services Access is enabled on the DefensePro
+HTTP_ACCESS_ENABLED =			True # True - Report if HTTP Access is enabled on the DefensePro, False - do not report if HTTP Access is enabled on the DefensePro
+
+SSH_TIMEOUT_CHECK =				True # True - Report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py), False - do not report if SSH timeout is not set to the configured value (defined as "SSH_TIMEOUT" in config.py)
+SSH_TIMEOUT_DEFAULT = 			False # True - Report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min), False - do not report if SSH timeout is set to default value (v8.x 10 min, v6.x 5 min)
+SSH_TIMEOUT = 5 # DefesePro SSH Timeout in minutes
+
+SERVICE_AUDITING = 				True # True - Report if Service Auditing is disabled and not in extended mode on the DefensePro, False - do not report if Service Auditing is disabled on the DefensePro
+TELNET_ACCESS_ENABLED = 		True # True - Report if Telnet Access is enabled on the DefensePro, False - do not report if Telnet Access is enabled on the DefensePro
+SIG_SMPL_RATE_DEFAULT = 		True # True - Report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py). False - do not report if Signature Sample Rate is set to default value (5001) instead of the recommended or configured value (defined as SIG_SMPL_RATE in config.py)
+SIG_SMPL_RATE_CHECK = 			True # True - Report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py), False - do not report if Signature Sample Rate is not set to the configured value (defined as SIG_SMPL_RATE in config.py)
+SIG_LATEST_VER_CHECK = 			True # True - Report if DefensePro signature database is outdated, False - do not report if DefensePro signature database is outdated
+NETCLASS_CHECKS = 				True # True - Run Network Class checks, False - do not run Network Class checks. Network Class checks are:
+										# Network class "{net}" is not applied on any policy
+										# Network classss "{net}" is shared across multiple policies
+										# Network class has a network subnet which is subnet of another larger subnet in another network class
+										# Duplicate network in different network classes
+
+################# Adjustable Security parameters #################
+
+BDOS_LST = 50 # BDOS Learning Suppression threshold in % - set the desirable value, if DP config deviates from the value set, it will be included in the report
+BDOS_BW_IN = 100000 # BDOS Inbound Traffic Bandwidth setting in Kbps. If BDOS bandwidth is set lower than defined threshold, it will be included in the report.
+BDOS_BW_OUT = 100000 # BDOS Outbound Traffic Bandwidth setting in Kbps.If BDOS bandwidth is set lower than defined threshold, it will be included in the report.
+SIG_SMPL_RATE = 503 # Signature sampled rate. If not equal to defined value, it will be included in the report.
+SIG_DB_DELTA = 0 # Signature DB Delta from the latest release to the current release in weeks. 0 equals to the latest release. 1 equals to the previous release. 2 equals to the release before the previous release and so on. 
+SIG_LATEST_VER = "" # Optional variable. Format SIG_LATEST_VER = "0009.0739.00" . If vision has no connectivity to radware.com to fetch the latest signature version. It can be set manually using this variable to compare if DefensePro database is outdated. Latest signature could be checked here https://portals.radware.com/Customer/Home/Tools/Security-Updates/
+
+
+
+############################################################################################################################################
+################################################## Other optional parameters ###############################################################
+############################################################################################################################################
+
+################# Proxy settings #################
+
+PROXY = False # True - use proxy server, False - don't use proxy server
+
+PROXY_HTTP = "proxy-radware.com"
+PROXY_HTTP_PORT = 80
+
+PROXY_HTTPS = "proxy-radware.com"
+PROXY_HTTPS_PORT = 443
+
+PROXY_USER = "radware"
+PROXY_PASS = "radware"
+
+################# Report settings and path #################
+REPORTS_PATH = "./Reports/" # Path to save reports
+CONFIG_PATH = "./Config/" # Path to save configuration
+RAW_DATA_PATH = "./Raw Data/" # Path to save raw data
+REQUESTS_PATH = "./Requests/" # Path to save requests payload
+REPORTS_TO_KEEP = 3 # Number of reports to keep in the Reports folder
+
+
+################# Log set up parameters #################
+LOG_FILE_PATH = "./log/" # folder to save the script logging events
+LOG_ROTATION_SIZE = 20000000 # Maximum rotation log file size in Bytes after which it will be split to another file
+LOG_ROTATION_HISTORY = 10 # Maximum amount of files to keep
+SYSLOG_SERVER = "1.1.1.1" # Syslog server destination IP
+SYSLOG_PORT = 514 # Syslog server destination UDP port
+
+
+################# Email set up parameters #################
+SMTP_AUTH = True
+SMTP_SERVER = "smtp.gmail.com" # SMTP server name
+SMTP_SERVER_PORT = 587 # SMTP server port
+SMTP_SENDER = 'test@gmail.com' # Email sender address setting
+SMTP_PASSWORD = 'radware' # Email password (optional)
+SMTP_LIST = ['test@radware.com'] # Email address/address list recepient/s(comma separated)
+SMTP_SUBJECT_PREFIX = "ALARM:DP - " # Email Subject
+SMTP_MSG_BODY = "This email was automated by the DefensePro monitoring script" # Email message body
