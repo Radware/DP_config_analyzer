@@ -486,7 +486,7 @@ def parseDNSStats(timenow):
 	
 						if 'response' in row:
 							if row['response'] == 'empty':
-								print(f'{dp_ip},{dp_name},{policy},' , row['protection'] ,' - no DNS stats ---')
+								# print(f'{dp_ip},{dp_name},{policy},' , row['protection'] ,' - no DNS stats ---')
 								empty_resp = True
 								with open(reports_path + f'traffic_stats_{timenow}.csv', mode='a', newline="") as traffic_stats:
 									traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)

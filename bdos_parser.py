@@ -88,12 +88,12 @@ def ParseBDOSRawReport():
 								empty_resp = True
 								with open(reports_path + 'low_bdos_baselines.csv', mode='a', newline="") as traffic_stats:
 									traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-									traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No BDOS stats ({row["ipv"]})', f'No BDOS stats ({row["ipv"]})' , f'No BDOS stats ({row["ipv"]})' , f'{cust_id}','Medium'])
+									traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No BDOS stats ', f'No BDOS stats ' , f'No BDOS stats ' , f'{cust_id}','Medium'])
 								
 								if cfg.HIGH_BDOS_BASELINE_REPORT:
 									with open(reports_path + 'high_bdos_baselines.csv', mode='a', newline="") as traffic_stats:
 										traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-										traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No BDOS stats ({row["ipv"]})', f'No BDOS stats ({row["ipv"]})' , f'No BDOS stats ({row["ipv"]})', f'No BDOS stats ({row["ipv"]})' , f'{cust_id}','Medium'])
+										traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No BDOS stats ', f'No BDOS stats ' , f'No BDOS stats ', f'No BDOS stats ' , f'{cust_id}','Medium'])
 
 								continue
 
@@ -148,7 +148,7 @@ def ParseBDOSRawReport():
 					
 						top_currthroughput_avg = (sum(top_currthroughput_list)) / (len(top_currthroughput_list))
 
-						multiplier = top_currthroughput_avg * 4
+						multiplier = top_currthroughput_avg * cfg.HIGH_BDOS_BASELINE_MULTIPLIER
 
 						if top_currthroughput_avg == 0.0:#if average traffic is 0.0, count this stamplist as non carrying traffic
 							no_traffic +=1
@@ -320,12 +320,12 @@ def ParseDNSRawReport():
 									empty_resp = True
 									with open(reports_path + 'low_bdos_baselines.csv', mode='a', newline="") as traffic_stats:
 										traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-										traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No DNS stats ({row["ipv"]})', f'No DNS stats ({row["ipv"]})' , f'No DNS stats ({row["ipv"]})',f'{cust_id}','Medium'])
+										traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No DNS stats ', f'No DNS stats ' , f'No DNS stats ',f'{cust_id}','Medium'])
 									
 									if cfg.HIGH_BDOS_BASELINE_REPORT:
 										with open(reports_path + 'high_bdos_baselines.csv', mode='a', newline="") as traffic_stats:
 											traffic_stats = csv.writer(traffic_stats, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-											traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No DNS stats ({row["ipv"]})', f'No DNS stats ({row["ipv"]})' , f'No DNS stats ({row["ipv"]})', f'No DNS stats ({row["ipv"]})',f'{cust_id}','Medium'])
+											traffic_stats.writerow([f'{dp_name}' , f'{dp_ip}', f'{policy}', row['protection'] , f'No DNS stats ', f'No DNS stats ' , f'No DNS stats ', f'No DNS stats ',f'{cust_id}','Medium'])
 
 									continue
 
@@ -371,7 +371,7 @@ def ParseDNSRawReport():
 						
 							top_currthroughput_avg = (sum(top_currthroughput_list)) / (len(top_currthroughput_list))
 
-							multiplier = top_currthroughput_avg * 4
+							multiplier = top_currthroughput_avg * cfg.HIGH_BDOS_BASELINE_MULTIPLIER
 
 							if top_currthroughput_avg == 0.0:#if average traffic is 0.0, count this stamplist as non carrying traffic
 								no_traffic +=1

@@ -2,9 +2,10 @@
 ############################################ Mandataory Variables ##########################################################################
 ############################################################################################################################################VISION_IP = "1.1.1.2" # APSolute Vision IP
 
+VISION_IP = "10.105.193.2" # APSolute Vision IP PS LAB
 VISION_USER = "radware" # APSolute Vision username
 VISION_PASS = "radware" # APSolute Vision password
-VISION_VER = 4.85 # APSolute Vision version
+VISION_VER = 5.4 # APSolute Vision version first two digits e.g. 5.4.
 
 
 
@@ -23,7 +24,7 @@ DP_IP_SCOPE_LIST = ['10.105.192.30','10.105.192.34'] # List of DefensePro IP add
 
 
 ############################################################################################################################################
-############################################ Report 1 and 2 (Optional)######################################################################
+############################################ Report 1, 2, 3 (Optional)######################################################################
 ############################################ Traffic Statistics Report and low bdos baselines report(Optional)  ############################
 ############################################################################################################################################
 # Traffic Statistics will create a report in csv format and includes highest traffic utilization average for the configurable historical timeframe in days (default is 1 days) for every policy including the following stats
@@ -37,23 +38,32 @@ DP_IP_SCOPE_LIST = ['10.105.192.30','10.105.192.34'] # List of DefensePro IP add
 # This report helps to understand volume of the traffic and make threshold based tuning decisions (BDOS, connection limit, traffic filter)
 # Report will be created under /Reports directory. Example /Reports/traffic_stats_20231227-1415.csv
 
-TRAFFIC_STATS = False # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics
+# ------------ Report 1 /Reports/traffic_stats.csv ---------------------------------
+
+TRAFFIC_STATS = True # True - Collect Traffic and BDOS statistics from DefensePro, False - don't collect Traffic/BDOS statistics
 DURATION = 1# sets the time frame in days for the traffic stats, BDOS, DNS data collection period
 MAX_POINTS = -10 #sets the number of top max values for calculating maximum average
 
+# ------------ Report 2 /Reports/low_bdos_baselines.csv ---------------------------------
 
 # Low bdos baselines report will create a csv report which includes policies that traffic is above normal baselines and tuning is required
 
-ANALYZE_BDOS_BASELINES = False # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report
+ANALYZE_BDOS_BASELINES = True # True - Generate low baselines report to /Reports/low_bdos_baselines.csv, False - don't generate low baselines report
 DET_MARGIN_RATIO = 1 #sets the virtual baseline ratio to set alert threshold lower than Normal baseline. For example 1 = Virtual baseline is the same as the actual normal baseline (100% of the actual Normal bassline). 0.7 sets the alert to trigger the alert if traffic reaches 70% of the Normal baseline.
 DET_ALARM_THRESHOLD = 10 #sets threshold for the number of occurances where the actual traffic went above the Virtual baseline. In case there were more occurrences than the defined threshold, these policies and protocols will be listed in the “low_bdos_baselines.csv”
 UDP_NBASELINE = 100000 # Show policies which has normal baselines set lower than 100Mbps in this example (optional)
+
+# ------------ Report 3 /Reports/high_bdos_baselines.csv ---------------------------------
+HIGH_BDOS_BASELINE_REPORT = True # This variable produces an informational report with list of protected BDOS protocols where baselines are X times higher than the traffic at average peak time, where X =  HIGH_BDOS_BASELINE_MULTIPLIER
+HIGH_BDOS_BASELINE_MULTIPLIER = 10 # This variable sets the threshold by how much times the baseline should be higher than the highest traffic peak to be considered as high
 
 ############################################################################################################################################
 ############################################ Report 3 (Optional)############################################################################
 ############################################ Configuration mapping report(Optional)  #######################################################
 ############################################################################################################################################
 # This report DefensePro Configuration mapping in csv format.
+
+# ------------ Report 4 /Reports/dpconfig_map.csv ------------------------------
 
 MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map.csv, False - don't map configuration 
 
@@ -95,6 +105,8 @@ MAP_CONFIG = True # True - Map DefensePro configuration to /Reports/dpconfig_map
 #	-     b. Network class is unused(orphaned)
 #	-     c. Same network class is shared with antoher policy
 #    d. Network class has a duplicate network with another network class
+
+# ------------ Report 5 /Reports/dpconfig_report.csv ------------------------------
 
 ANALYZE_CONFIG = True # True - Analyze DefensePro configuration to /Reports/dpconfig_report.csv, False - don't analyze configuration 
 
