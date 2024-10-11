@@ -23,7 +23,7 @@ class DataMapper():
 
 		with open(reports_path + f'dpconfig_map_{self.timenow}.csv', mode='w', newline="") as dpconfigmap_report:
 			dp_configmap_writer = csv.writer(dpconfigmap_report, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-			dp_configmap_writer.writerow(['DefensePro Name' , 'DefensePro IP' ,	'DefensePro Version' , 'Policy Name','Policy State','Policy Block/Report', 'Policy Packet Reporting',\
+			dp_configmap_writer.writerow(['DefensePro Name' , 'DefensePro IP' ,	'DefensePro Version' , 'Policy Name', 'Policy Priority' ,'Policy State','Policy Block/Report', 'Policy Packet Reporting',\
 				 'SRC Network Profile Name','SRC Network Addresses','DST Network Profile Name','DST Network Addresses',\
 				 'Signature Profile Name','Out of State Profile Name', 'Out of State Block/Report','Out of State Activation Threshold','Out of State Termination Threshold','Out of State Enable SYN-ACK','Anti-Scanning Profile Name', 'EAAF Profile Name',\
 					'Geolocaation Profile','Connection Limit Profile Name','Connection Limit Profile Protections and settings','SYN Flood Protection Profile',\
@@ -786,13 +786,13 @@ class DataMapper():
 			
 
 
-	def map_policy(self,dp_name,dp_ver,dp_ip,pol_name,policy):
+	def map_policy(self,dp_name,dp_ver,dp_ip,pol_name,pol_priority,policy):
 		policy_settings = [] # this list will go to the csv file
 		policy_settings.append(dp_name)
+		policy_settings.append(pol_priority)
 		policy_settings.append(dp_ip)
 		policy_settings.append(dp_ver)
 		policy_settings.append(pol_name)
-
 
 		if 'rsIDSNewRulesState' in policy: # Check if policy Enabled/Disabled
 			if policy['rsIDSNewRulesState'] == '2':
@@ -1005,9 +1005,10 @@ class DataMapper():
 
 				for policy in dp_attr['Policies']['rsIDSNewRulesTable']: #key is rsIDSNewRulesTable, value is list of dictionary objects (each object is a dictionary which contains policy name and its attributes )
 					pol_name = policy['rsIDSNewRulesName']
+					pol_priority = policy['rsIDSNewRulesPriority']
 					# pol_bdos_prof_name = policy['rsIDSNewRulesProfileNetflood']
 					if pol_name != 'null':
-						self.map_policy(dp_name,dp_ver,dp_ip,pol_name,policy)
+						self.map_policy(dp_name,dp_ver,dp_ip,pol_name,pol_priority,policy)
 
 	
 

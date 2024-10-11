@@ -81,13 +81,36 @@ The script interacts with Radware APSolute Vision DefensePro and collects all th
 
 1. The solution requires python 3.6 and higher and installing required libraries
 
-2. Install required libraries
+2. Create a virtual environment (optional but recommended):**
+ 
+   ```bash
+    # macOS/Linux
+    # You may need to run `sudo apt-get install python3-venv` first on Debian-based OSs
+    python3 -m venv .venv
 
-pip install -r requirements.txt
+    # Windows
+    # You can also use `py -3 -m venv .venv`
+    python -m venv .venv
 
+    #Activeate
+
+    # On Windows: 
+    
+    .venv\Scripts\activate
+
+    #Linux
+    source .venv/bin/activate   
+
+
+   ```
+
+3. Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 ## How to run
 
-1. Rename file `config.py example` to ‘config.py’
+1. Create config.py file from `config.py example`
 2. Open "config.py" and set the mandatory and optional variables (read config.py comments with explanations).
 3. Navigate to the directory containing the script and run the script from that directory.
 
@@ -397,7 +420,8 @@ V6.2.3
 	- Added mapping UDP-Frag
 
 V6.2.4
-	- config.py and traffic_stats_parser.py - added configurable variable AVG_POINTS
+	- config.py and traffic_stats_parser.py
+	 configurable variable AVG_POINTS
 
 V6.2.4.1
 	- config.py example
@@ -410,12 +434,25 @@ V6.2.4.2
 		bugfix for empty traffic stats for BDOS and dns stats
 	- requirements.txt
 		updated to include only requests
-	
+
+V6.3 (10/11/24)
+	- Added policy priority mapping
 	
 # Functionality planned to be added:
 
-- Add full configuration mapping with thresholds to a separate file
+- HTTPS flood protection mapping
+1 - get multiple API calls and responses
+2 - review, map each key/value and decide what needs to be mapped and how (how many columns, how exactly)
+3 - get the data through API call
+4 - parse the output and map to csv
+
+
+- ACL mapping
 - Add check if network class is in use by any of the ACL's- currently it checks only if it is applied on the policies
-- Add connection limit profiles are orphaned
+
+- Add full configuration mapping with thresholds to a separate file
+- Add connection limit profiles are orphaned (low)
+- Connection limit orphaned rules (low)
 - Add traffic filters (report/block), orphaned
-- Add recommendation priority High/Med/Low to the final report
+- Add recommendation priority High/Med/Low to the final report (Medium)
+-
