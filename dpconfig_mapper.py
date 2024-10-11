@@ -789,10 +789,10 @@ class DataMapper():
 	def map_policy(self,dp_name,dp_ver,dp_ip,pol_name,pol_priority,policy):
 		policy_settings = [] # this list will go to the csv file
 		policy_settings.append(dp_name)
-		policy_settings.append(pol_priority)
 		policy_settings.append(dp_ip)
 		policy_settings.append(dp_ver)
 		policy_settings.append(pol_name)
+		policy_settings.append(pol_priority)
 
 		if 'rsIDSNewRulesState' in policy: # Check if policy Enabled/Disabled
 			if policy['rsIDSNewRulesState'] == '2':
