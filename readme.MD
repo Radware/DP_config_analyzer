@@ -446,6 +446,13 @@ V6.3 (10/11/24)
 3 - get the data through API call
 4 - parse the output and map to csv
 
+V6.3.1 (3/31/25)
+
+	- Fixed a bug to send low baselines report over email
+
+-------------------------------
+
+Functionality to be added
 
 - ACL mapping
 - Add check if network class is in use by any of the ACL's- currently it checks only if it is applied on the policies
