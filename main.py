@@ -462,7 +462,7 @@ if cfg.TRAFFIC_STATS:
 if cfg.ANALYZE_BDOS_BASELINES:
 	print('Starting BDOS baselines analysis')
 	logging_helper.logging.info('Starting BDOS baselines analysis')
-	report.append(bdos_parser.parse())
+	report.extend(bdos_parser.parse())
 
 	print('BDOS baselines analysis is complete')
 	logging_helper.logging.info('BDOS baselines analysis is complete')
