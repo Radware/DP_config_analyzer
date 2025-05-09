@@ -71,13 +71,13 @@ class Vision:
 			logging.info('Vision Login error: ' + response['message'])
 			exit(1)
 
-	def _post(self, url, requestData = ""):
+	def _post(self, url, json = ""):
 
 		max_retries = 3  # Number of retries for 403 errors
 
 		for attempt in range(max_retries):
 			try:
-				response = self.sess.post(url=url, verify=False, data=requestData)
+				response = self.sess.post(url=url, verify=False, json=json)
 
 				# Check if session expired (403 Forbidden)
 				if response.status_code == 403:
@@ -85,7 +85,7 @@ class Vision:
 					self.login()  # Refresh session
 					
 					# Retry after logging in
-					response = self.sess.post(url=url, verify=False, data=requestData)
+					response = self.sess.post(url=url, verify=False, json=json)
 
 				# Raise an exception if the response is an error (except 403 which we handled or 200 OK)
 				response.raise_for_status()
@@ -502,7 +502,7 @@ class Vision:
 			if ipv6:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, requestData = self.BDOSformatRequest )
+				r = self._post(url = url, json = self.BDOSformatRequest )
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -518,7 +518,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'true'
-				r = self._post(url = url, requestData = self.BDOSformatRequest)
+				r = self._post(url = url, json = self.BDOSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				
@@ -608,7 +608,7 @@ class Vision:
 				#print(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - IPv6')  
 
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, requestData = self.BDOSformatRequest)
+				r = self._post(url = url, json = self.BDOSformatRequest)
 
 				jsonData = json.loads(r.text)
 
@@ -625,7 +625,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'true'
-				r = self._post(url = url, requestData = self.BDOSformatRequest_PPS)
+				r = self._post(url = url, json = self.BDOSformatRequest_PPS)
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -699,7 +699,7 @@ class Vision:
 			if ipv6:
 						
 				self.DNSformatRequest['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, requestData = self.DNSformatRequest)
+				r = self._post(url = url, json = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 
@@ -719,7 +719,7 @@ class Vision:
 
 				self.DNSformatRequest['criteria'][0]['value'] = 'true'
 				
-				r = self._post(url = url, requestData = self.DNSformatRequest)
+				r = self._post(url = url, json = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				# print(f'{pol_dp_ip}, policy {pol_name} - executing DNS IPv4 query')
@@ -750,7 +750,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, requestData = self.trafficformatrequest)
+		r = self._post(url = url, json = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListBPS = {policy:jsonData['data']}
@@ -768,7 +768,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, requestData = self.trafficformatrequest)
+		r = self._post(url = url, json = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListPPS = {policy:jsonData['data']}
@@ -785,7 +785,7 @@ class Vision:
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, requestData = self.trafficformatrequestCPS)
+		r = self._post(url = url, json = self.trafficformatrequestCPS)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcps = {policy:jsonData['data']}
@@ -802,7 +802,7 @@ class Vision:
 		self.trafficformatrequestcec['aggregation']['criteria'][0]['lower'] = self.report_duration
 		self.trafficformatrequestcec['aggregation']['criteria'][1]['filters'][0]['filters'][0]['value'] = dp_ip
 
-		r = self._post(url = url, requestData = self.trafficformatrequestcec)
+		r = self._post(url = url, json = self.trafficformatrequestcec)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcec = jsonData['data']
