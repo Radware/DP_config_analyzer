@@ -106,7 +106,7 @@ class Vision:
 
 		for attempt in range(max_retries):
 			try:
-				response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxy=proxy)
+				response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxies=proxy)
 
 				# Check if session expired (403 Forbidden)
 				if response.status_code == 403:
@@ -114,7 +114,7 @@ class Vision:
 					self.login()  # Refresh session
 					
 					# Retry after logging in
-					response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxy=proxy)
+					response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxies=proxy)
 
 				# Raise an exception if the response is an error
 				response.raise_for_status()
