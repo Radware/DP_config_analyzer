@@ -502,7 +502,7 @@ class Vision:
 			if ipv6:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, json = self.BDOSformatRequest )
+				r = self._post(url = url, requestData = self.BDOSformatRequest )
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -518,7 +518,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'true'
-				r = self._post(url = url, json = self.BDOSformatRequest)
+				r = self._post(url = url, requestData = self.BDOSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				
@@ -608,7 +608,7 @@ class Vision:
 				#print(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - IPv6')  
 
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, json = self.BDOSformatRequest)
+				r = self._post(url = url, requestData = self.BDOSformatRequest)
 
 				jsonData = json.loads(r.text)
 
@@ -625,7 +625,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'true'
-				r = self._post(url = url, json = self.BDOSformatRequest_PPS)
+				r = self._post(url = url, requestData = self.BDOSformatRequest_PPS)
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -699,7 +699,7 @@ class Vision:
 			if ipv6:
 						
 				self.DNSformatRequest['criteria'][0]['value'] = 'false'
-				r = self._post(url = url, json = self.DNSformatRequest)
+				r = self._post(url = url, requestData = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 
@@ -719,7 +719,7 @@ class Vision:
 
 				self.DNSformatRequest['criteria'][0]['value'] = 'true'
 				
-				r = self._post(url = url, json = self.DNSformatRequest)
+				r = self._post(url = url, requestData = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				# print(f'{pol_dp_ip}, policy {pol_name} - executing DNS IPv4 query')
@@ -750,7 +750,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, json = self.trafficformatrequest)
+		r = self._post(url = url, requestData = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListBPS = {policy:jsonData['data']}
@@ -768,7 +768,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, json = self.trafficformatrequest)
+		r = self._post(url = url, requestData = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListPPS = {policy:jsonData['data']}
@@ -785,7 +785,7 @@ class Vision:
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self._post(url = url, json = self.trafficformatrequestCPS)
+		r = self._post(url = url, requestData = self.trafficformatrequestCPS)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcps = {policy:jsonData['data']}
@@ -802,7 +802,7 @@ class Vision:
 		self.trafficformatrequestcec['aggregation']['criteria'][0]['lower'] = self.report_duration
 		self.trafficformatrequestcec['aggregation']['criteria'][1]['filters'][0]['filters'][0]['value'] = dp_ip
 
-		r = self._post(url = url, json = self.trafficformatrequestcec)
+		r = self._post(url = url, requestData = self.trafficformatrequestcec)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcec = jsonData['data']
