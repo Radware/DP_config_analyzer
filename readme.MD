@@ -437,6 +437,9 @@ V6.2.4.2
 
 V6.3 (10/11/24)
 	- Added policy priority mapping
+
+V6.4 (5/9/2025)
+	- Added reauthentication logic if JSESSIONID has expired
 	
 # Functionality planned to be added:
 

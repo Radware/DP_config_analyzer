@@ -71,11 +71,70 @@ class Vision:
 			logging.info('Vision Login error: ' + response['message'])
 			exit(1)
 
+	def _post(self, URL, requestData = ""):
+
+		max_retries = 3  # Number of retries for 403 errors
+
+		for attempt in range(max_retries):
+			try:
+				response = self.sess.post(url=URL, verify=False, data=requestData)
+
+				# Check if session expired (403 Forbidden)
+				if response.status_code == 403:
+					print(f"Attempt {attempt + 1}: Received 403 Forbidden. Refreshing session...")
+					self.login()  # Refresh session
+					
+					# Retry after logging in
+					response = self.sess.post(url=URL, verify=False, data=requestData)
+
+				# Raise an exception if the response is an error (except 403 which we handled or 200 OK)
+				response.raise_for_status()
+
+				return response  # Return the successful response
+
+			except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, requests.exceptions.SSLError,
+				requests.exceptions.Timeout, requests.exceptions.ConnectTimeout,
+				requests.exceptions.ReadTimeout) as err:
+				print(f"Request failed: {err}")
+				time.sleep(2 ** attempt)  # Exponential backoff before retry
+
+		print("Max retries reached. Request failed.")
+		return None  # Return None if all retries fail
+	
+	def _get(self, URL, params=None, headers=None, proxy=None):
+		max_retries = 3  # Number of retries for 403 errors
+
+		for attempt in range(max_retries):
+			try:
+				response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxy=proxy)
+
+				# Check if session expired (403 Forbidden)
+				if response.status_code == 403:
+					print(f"Attempt {attempt + 1}: Received 403 Forbidden. Refreshing session...")
+					self.login()  # Refresh session
+					
+					# Retry after logging in
+					response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxy=proxy)
+
+				# Raise an exception if the response is an error
+				response.raise_for_status()
+
+				return response  # Return the successful response
+
+			except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, requests.exceptions.SSLError,
+					requests.exceptions.Timeout, requests.exceptions.ConnectTimeout,
+					requests.exceptions.ReadTimeout) as err:
+				print(f"Request failed: {err}")
+				time.sleep(2 ** attempt)  # Exponential backoff
+
+		print("Max retries reached. Request failed.")
+		return None  # Return None if all retries fail
+
 	def InternetConnectivity(self):
 		# Check if there is internet access
 
 		url = 'https://www.radware.com'
-
+		# this is to avoid getting blocked by radware appsec
 		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.' + str(random.randint(1, 1000)) + '.0.0 Safari/537.36'}
 
 		try:
@@ -84,9 +143,11 @@ class Vision:
 				proxy = {
 				'http': cfg.PROXY_HTTP + ':' + str(cfg.PROXY_HTTP_PORT),
 				}
-				response = requests.request(method='GET', url=url, headers=headers, proxies=proxy, verify=False)
+				# response = requests.request(method='GET', url=url, headers=headers, proxies=proxy, verify=False)
+				response = self._get(url=url, headers=headers, proxy=proxy)
 			else:
-				response = requests.request(method='GET', url=url, verify=False)
+				# response = requests.request(method='GET', url=url, verify=False)
+				response = self._get(url=url, headers=headers)
 
 				
 			if response.status_code == 200:
@@ -104,7 +165,7 @@ class Vision:
 	def getDeviceList(self):
 		# Returns list of DP with mgmt IP, type, Name
 		devices_url = self.base_url + '/mgmt/system/config/itemlist/alldevices'
-		r = self.sess.get(url=devices_url, verify=False)
+		r = self._get(url=devices_url)
 		json_txt = r.json()
 
 		dev_list = {item['managementIp']: {'Type': item['type'], 'Name': item['name'],
@@ -124,7 +185,7 @@ class Vision:
 		# Returns Signature profile list with rules
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSSignaturesProfilesTable?props=rsIDSSignaturesProfileName,rsIDSSignaturesProfileRuleName,rsIDSSignaturesProfileRuleAttributeType,rsIDSSignaturesProfileRuleAttributeName"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		sig_list = r.json()
 		
 		if sig_list.get("status") == "error":
@@ -136,7 +197,7 @@ class Vision:
 		# Returns BDOS profile config
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsNetFloodProfileTable"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		bdos_config = r.json()
 		
 		if bdos_config.get("status") == "error":
@@ -149,7 +210,7 @@ class Vision:
 		# Returns DNS profile config
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsDnsProtProfileTable"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		dns_config = r.json()
 		
 		if dns_config.get("status") == "error":
@@ -162,7 +223,7 @@ class Vision:
 		# Returns BDOS profile config
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSSynProfilesTable?props=rsIDSSynProfilesName,rsIDSSynProfileServiceName"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		synp_prof_list = r.json()
 		
 		if synp_prof_list.get("status") == "error":
@@ -175,7 +236,7 @@ class Vision:
 		# Returns BDOS profile config
 		url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSSynProfilesParamsTable"
-		r = self.sess.get(url=url, verify=False)
+		r = self._get(url=url)
 		synp_prof_params_list = r.json()
 		
 		if synp_prof_params_list.get("status") == "error":
@@ -188,7 +249,7 @@ class Vision:
 		# Returns SYNP profile config
 		url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSSYNAttackTable"
-		r = self.sess.get(url=url, verify=False)
+		r = self._get(url=url)
 		synp_protections_table = r.json()
 		
 		if synp_protections_table.get("status") == "error":
@@ -201,7 +262,7 @@ class Vision:
 		# Returns Connectlion limit profile config
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSConnectionLimitProfileTable"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		connlim_prof_list = r.json()
 		
 		if connlim_prof_list.get("status") == "error":
@@ -215,7 +276,7 @@ class Vision:
 		# Returns Connlim profile config
 		url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSConnectionLimitAttackTable"
-		r = self.sess.get(url=url, verify=False)
+		r = self._get(url=url)
 		connlim_prof_attacktable_list = r.json()
 		
 		if connlim_prof_attacktable_list.get("status") == "error":
@@ -228,7 +289,7 @@ class Vision:
 		# Returns Out of State profile config
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsStatefulProfileTable"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		oos_prof_list = r.json()
 		
 		if oos_prof_list.get("status") == "error":
@@ -243,7 +304,7 @@ class Vision:
 		# Returns TF profiles
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsNewTrafficProfileTable"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		tf_prof_list = r.json()
 		
 		if tf_prof_list.get("status") == "error":
@@ -257,7 +318,7 @@ class Vision:
 		# Returns TF rules 
 		url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsNewTrafficFilterTable/"
-		r = self.sess.get(url=url, verify=False)
+		r = self._get(url=url)
 		tf_prof_rules_list = r.json()
 		
 		if tf_prof_rules_list.get("status") == "error":
@@ -275,7 +336,7 @@ class Vision:
 
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsBWMNetworkTable/"
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		net_list = r.json()
 		
 		if net_list.get("status") == "error":
@@ -288,7 +349,7 @@ class Vision:
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/rsIDSNewRulesTable"
 		# URL params ?count=1000&props=rsIDSNewRulesName
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 		policy_list = r.json()
 
 		if policy_list.get("status") == "error":
@@ -303,7 +364,7 @@ class Vision:
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
 			dp_ip + "/config/getcfg?saveToDb=false&includePrivateKeys=false&passphrase="
 		# URL params ?count=1000&props=rsIDSNewRulesName
-		r = self.sess.get(url=policy_url, verify=False)
+		r = self._get(url=policy_url)
 
 		with open(config_path + f'{dp_ip}_config.txt', 'wb') as f:
 			f.write(r.content) #Write to file
@@ -318,7 +379,7 @@ class Vision:
 			dp_ip + "/monitor?prop=rsPlatformIdentifier,rsWSDSysUpTime,rsWSDSysBaseMACAddress,rsIDSAttackDBVersion,rndManagedTime,rndManagedDate,rndBrgVersion,rdwrDPBuildID,rsWSDVersionStatus,rdwrDeviceThroughput,rsWSDDRAMSize,rsCoresNumber,rsCPUFrequency"
 
 		try:
-			r = self.sess.get(url=policy_url, verify=False)
+			r = self._get(url=policy_url)
 			r.raise_for_status()
 			monitor_info = r.json()
 			return monitor_info
@@ -338,7 +399,7 @@ class Vision:
 		# add header User-Agent and Accept-Encoding to avoid 403 error
 		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.' + str(random.randint(1, 1000)) + '.0.0 Safari/537.36'}
 		try:
-			r = self.sess.get(url, verify=False,headers=headers)
+			r = self._get(url,headers=headers)
 			r.raise_for_status()
 
 			latest_sig_db = r.content
@@ -357,7 +418,7 @@ class Vision:
 		url = self.base_url + "/mgmt/monitor/scc/AllSubscriptions"
 
 		try:
-			r = self.sess.get(url, verify=False)
+			r = self._get(url)
 			r.raise_for_status()
 
 			all_subscriptions = r.content
@@ -441,7 +502,7 @@ class Vision:
 			if ipv6:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'false'
-				r = self.sess.post(url = url, json = self.BDOSformatRequest , verify=False)
+				r = self._post(url = url, json = self.BDOSformatRequest )
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -457,7 +518,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'true'
-				r = self.sess.post(url = url, json = self.BDOSformatRequest , verify=False)
+				r = self._post(url = url, json = self.BDOSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				
@@ -547,7 +608,7 @@ class Vision:
 				#print(f'dp ip is {net_dp_ip},policy {pol_name}, network {net_name} - IPv6')  
 
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'false'
-				r = self.sess.post(url = url, json = self.BDOSformatRequest , verify=False)
+				r = self._post(url = url, json = self.BDOSformatRequest)
 
 				jsonData = json.loads(r.text)
 
@@ -564,7 +625,7 @@ class Vision:
 			if ipv4:
 			
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'true'
-				r = self.sess.post(url = url, json = self.BDOSformatRequest_PPS , verify=False)
+				r = self._post(url = url, json = self.BDOSformatRequest_PPS)
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -638,7 +699,7 @@ class Vision:
 			if ipv6:
 						
 				self.DNSformatRequest['criteria'][0]['value'] = 'false'
-				r = self.sess.post(url = url, json = self.DNSformatRequest , verify=False)
+				r = self._post(url = url, json = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 
@@ -658,7 +719,7 @@ class Vision:
 
 				self.DNSformatRequest['criteria'][0]['value'] = 'true'
 				
-				r = self.sess.post(url = url, json = self.DNSformatRequest , verify=False)
+				r = self._post(url = url, json = self.DNSformatRequest)
 				jsonData = json.loads(r.text)
 				
 				# print(f'{pol_dp_ip}, policy {pol_name} - executing DNS IPv4 query')
@@ -689,7 +750,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self.sess.post(url = url, json = self.trafficformatrequest , verify=False)
+		r = self._post(url = url, json = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListBPS = {policy:jsonData['data']}
@@ -707,7 +768,7 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self.sess.post(url = url, json = self.trafficformatrequest , verify=False)
+		r = self._post(url = url, json = self.trafficformatrequest)
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListPPS = {policy:jsonData['data']}
@@ -724,7 +785,7 @@ class Vision:
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
-		r = self.sess.post(url = url, json = self.trafficformatrequestCPS , verify=False)
+		r = self._post(url = url, json = self.trafficformatrequestCPS)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcps = {policy:jsonData['data']}
@@ -741,7 +802,7 @@ class Vision:
 		self.trafficformatrequestcec['aggregation']['criteria'][0]['lower'] = self.report_duration
 		self.trafficformatrequestcec['aggregation']['criteria'][1]['filters'][0]['filters'][0]['value'] = dp_ip
 
-		r = self.sess.post(url = url, json = self.trafficformatrequestcec , verify=False)
+		r = self._post(url = url, json = self.trafficformatrequestcec)
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcec = jsonData['data']
