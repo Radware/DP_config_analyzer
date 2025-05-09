@@ -71,13 +71,13 @@ class Vision:
 			logging.info('Vision Login error: ' + response['message'])
 			exit(1)
 
-	def _post(self, URL, requestData = ""):
+	def _post(self, url, requestData = ""):
 
 		max_retries = 3  # Number of retries for 403 errors
 
 		for attempt in range(max_retries):
 			try:
-				response = self.sess.post(url=URL, verify=False, data=requestData)
+				response = self.sess.post(url=url, verify=False, data=requestData)
 
 				# Check if session expired (403 Forbidden)
 				if response.status_code == 403:
@@ -85,7 +85,7 @@ class Vision:
 					self.login()  # Refresh session
 					
 					# Retry after logging in
-					response = self.sess.post(url=URL, verify=False, data=requestData)
+					response = self.sess.post(url=url, verify=False, data=requestData)
 
 				# Raise an exception if the response is an error (except 403 which we handled or 200 OK)
 				response.raise_for_status()
