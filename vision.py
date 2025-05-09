@@ -101,12 +101,12 @@ class Vision:
 		print("Max retries reached. Request failed.")
 		return None  # Return None if all retries fail
 	
-	def _get(self, URL, params=None, headers=None, proxy=None):
+	def _get(self, url, params=None, headers=None, proxy=None):
 		max_retries = 3  # Number of retries for 403 errors
 
 		for attempt in range(max_retries):
 			try:
-				response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxies=proxy)
+				response = self.sess.get(url=url, verify=False, params=params, headers=headers, proxies=proxy)
 
 				# Check if session expired (403 Forbidden)
 				if response.status_code == 403:
@@ -114,7 +114,7 @@ class Vision:
 					self.login()  # Refresh session
 					
 					# Retry after logging in
-					response = self.sess.get(url=URL, verify=False, params=params, headers=headers, proxies=proxy)
+					response = self.sess.get(url=url, verify=False, params=params, headers=headers, proxies=proxy)
 
 				# Raise an exception if the response is an error
 				response.raise_for_status()
