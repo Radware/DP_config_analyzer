@@ -519,6 +519,7 @@ class Vision:
 			
 				self.BDOSformatRequest['criteria'][0]['value'] = 'true'
 				r = self._post(url = url, json = self.BDOSformatRequest)
+				print(f'BDOS - {pol_dp_ip},{pol_name},{protocol}')
 				jsonData = json.loads(r.text)
 				
 				
@@ -626,6 +627,8 @@ class Vision:
 			
 				self.BDOSformatRequest_PPS['criteria'][0]['value'] = 'true'
 				r = self._post(url = url, json = self.BDOSformatRequest_PPS)
+				print(f'BDOS PPS - {pol_dp_ip},{pol_name},{protocol}')
+
 				jsonData = json.loads(r.text)
 				
 				if jsonData['data'] == ([]): #Empty response
@@ -720,6 +723,8 @@ class Vision:
 				self.DNSformatRequest['criteria'][0]['value'] = 'true'
 				
 				r = self._post(url = url, json = self.DNSformatRequest)
+				print(f'DNS - {pol_dp_ip},{pol_name},{protocol}')
+
 				jsonData = json.loads(r.text)
 				
 				# print(f'{pol_dp_ip}, policy {pol_name} - executing DNS IPv4 query')
@@ -743,7 +748,8 @@ class Vision:
 
 	def getTrafficStatsBPS(self, dp_ip, policy):
 
-		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
+		# url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_RAW_REPORTS'
 		
 		self.trafficformatrequest['aggregation']['criteria'][1]['value'] = 'bps'
 		self.trafficformatrequest['aggregation']['criteria'][3]['lower'] = self.report_duration
@@ -751,6 +757,8 @@ class Vision:
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
 		r = self._post(url = url, json = self.trafficformatrequest)
+		print(f'Traffic BPS - {dp_ip}, {policy}')
+
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListBPS = {policy:jsonData['data']}
@@ -761,14 +769,16 @@ class Vision:
 ################Traffic stats PPS######################
 
 	def getTrafficStatsPPS(self, dp_ip, policy):
-		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
-		
+		# url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_AGG_REPORTS'
+		url = f'https://{self.ip}/mgmt/monitor/reporter/reports-ext/DP_TRAFFIC_UTILIZATION_RAW_REPORTS'
+
 		self.trafficformatrequest['aggregation']['criteria'][1]['value'] = 'pps'
 		self.trafficformatrequest['aggregation']['criteria'][3]['lower'] = self.report_duration
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][0]['value'] = dp_ip
 		self.trafficformatrequest['aggregation']['criteria'][4]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
 		r = self._post(url = url, json = self.trafficformatrequest)
+		print(f'Traffic PPS - {dp_ip}, {policy}')
 		jsonData = json.loads(r.text)
 	
 		TrafficReportListPPS = {policy:jsonData['data']}
@@ -786,6 +796,7 @@ class Vision:
 		self.trafficformatrequestCPS['aggregation']['criteria'][3]['filters'][0]['filters'][1]['filters'][0]['value'] = policy
 
 		r = self._post(url = url, json = self.trafficformatrequestCPS)
+		print(f'Traffic CPS - {dp_ip}, {policy}')
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcps = {policy:jsonData['data']}
@@ -803,6 +814,7 @@ class Vision:
 		self.trafficformatrequestcec['aggregation']['criteria'][1]['filters'][0]['filters'][0]['value'] = dp_ip
 
 		r = self._post(url = url, json = self.trafficformatrequestcec)
+		print(f'Traffic CEC - {dp_ip}')
 		jsonData = json.loads(r.text)
 	
 		trafficreportlistcec = jsonData['data']
@@ -1025,144 +1037,183 @@ class Vision:
 
 
 
-	def getBDOSReportFromVision(self,full_pol_dic,full_net_dic,bdos_stats_dict,cust_id):
+	def getBDOSReportFromVision(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,bdos_stats_dict,cust_id):
 
+		bdos_stats_dict[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Customer ID': cust_id,
+			'BDOS Report': []
+		}
 
-		for dp_ip,dp_attr in full_pol_dic.items():
-			bdos_stats_dict[dp_ip] = {}
-			bdos_stats_dict[dp_ip]['Name'] = dp_attr['Name']
-			bdos_stats_dict[dp_ip]['Customer ID'] = cust_id
-			bdos_stats_dict[dp_ip]['BDOS Report'] = []
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		rules_table = device_policies.get('rsIDSNewRulesTable', [])
 
-			if not dp_attr['Policies']:
-				continue
-			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-				if pol_attr["rsIDSNewRulesProfileNetflood"] != "" and pol_attr["rsIDSNewRulesProfileNetflood"] != "null" and pol_attr["rsIDSNewRulesName"] != "null" and pol_attr['rsIDSNewRulesState'] != "2":
-					bdos_report = self.getBDOSTrafficReport(dp_ip,pol_attr,full_net_dic)
-					bdos_stats_dict[dp_ip]['BDOS Report'].append(bdos_report)
+		for pol_attr in rules_table:
+			if (
+				pol_attr.get("rsIDSNewRulesProfileNetflood") not in ("", "null") and
+				pol_attr.get("rsIDSNewRulesName") != "null" and
+				pol_attr.get("rsIDSNewRulesState") != "2"
+			):
+				bdos_report = self.getBDOSTrafficReport(dev_list_dp_ip, pol_attr, full_net_dic)
+				bdos_stats_dict[dev_list_dp_ip]['BDOS Report'].append(bdos_report)
 
 		return bdos_stats_dict
 
 
-	def getBDOSReportFromVision_PPS(self,dev_ip,dev_attr,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id):
+	def getBDOSReportFromVision_PPS(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id):
 
-		for dp_ip,dp_attr in full_pol_dic.items():
-			if dp_ip == dev_ip:
-				bdos_stats_dict_pps[dp_ip] = {}
-				bdos_stats_dict_pps[dp_ip]['Name'] = dp_attr['Name']
-				bdos_stats_dict_pps[dp_ip]['Customer ID'] = cust_id
-				bdos_stats_dict_pps[dp_ip]['BDOS Report'] = []
+		bdos_stats_dict_pps[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Customer ID': cust_id,
+			'BDOS Report': []
+		}
 
-				if not dp_attr['Policies']:
-					continue
-				for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-					if pol_attr["rsIDSNewRulesProfileNetflood"] != "" and pol_attr["rsIDSNewRulesProfileNetflood"] != "null" and pol_attr["rsIDSNewRulesName"] != "null" and pol_attr['rsIDSNewRulesState'] != "2":
-						bdos_report_pps = self.getBDOSTrafficReport_PPS(dp_ip,pol_attr,full_net_dic)
-						bdos_stats_dict_pps[dp_ip]['BDOS Report'].append(bdos_report_pps)
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		rules_table = device_policies.get('rsIDSNewRulesTable', [])
+
+		for pol_attr in rules_table:
+			if (
+				pol_attr.get("rsIDSNewRulesProfileNetflood") not in ("", "null") and
+				pol_attr.get("rsIDSNewRulesName") != "null" and
+				pol_attr.get("rsIDSNewRulesState") != "2"
+			):
+				bdos_report_pps = self.getBDOSTrafficReport_PPS(dev_list_dp_ip, pol_attr, full_net_dic)
+				bdos_stats_dict_pps[dev_list_dp_ip]['BDOS Report'].append(bdos_report_pps)
 
 		return bdos_stats_dict_pps
 
 
-	def getDNSReportFromVision(self,full_pol_dic,full_net_dic,dns_stats_dict,cust_id):
+	def getDNSReportFromVision(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,dns_stats_dict,cust_id):
 
-		for dp_ip,dp_attr in full_pol_dic.items():
-			dns_stats_dict[dp_ip] = {}
-			dns_stats_dict[dp_ip]['Name'] = dp_attr['Name']
-			dns_stats_dict[dp_ip]['Customer ID'] = cust_id
-			dns_stats_dict[dp_ip]['DNS Report'] = []
+		dns_stats_dict[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Customer ID': cust_id,
+			'DNS Report': []
+		}
 
-			if not dp_attr['Policies']:
-				continue
-			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-				if pol_attr["rsIDSNewRulesProfileDNS"] != "" and pol_attr["rsIDSNewRulesProfileDNS"] != "null" and pol_attr["rsIDSNewRulesName"] != "null" and pol_attr['rsIDSNewRulesState'] != "2":
-					dns_report = self.getDNStrafficReport(dp_ip,pol_attr,full_net_dic)
-					dns_stats_dict[dp_ip]['DNS Report'].append(dns_report)
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		rules_table = device_policies.get('rsIDSNewRulesTable', [])
+
+		for pol_attr in rules_table:
+			if (
+				pol_attr.get("rsIDSNewRulesProfileDNS") not in ("", "null") and
+				pol_attr.get("rsIDSNewRulesName") != "null" and
+				pol_attr.get("rsIDSNewRulesState") != "2"
+			):
+				dns_report = self.getDNStrafficReport(dev_list_dp_ip, pol_attr, full_net_dic)
+				dns_stats_dict[dev_list_dp_ip]['DNS Report'].append(dns_report)
 
 		return dns_stats_dict
 
-	def getTrafficUtilizationBPS(self,full_pol_dic,traffic_stats_dict_bps):
 
-		for dp_ip,dp_attr in full_pol_dic.items():
+	def getTrafficUtilizationBPS(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_bps):
 
-			traffic_stats_dict_bps[dp_ip] = {}
-			traffic_stats_dict_bps[dp_ip]['Name'] = dp_attr['Name']
-			traffic_stats_dict_bps[dp_ip]['Traffic Report BPS'] = []
+		traffic_stats_dict_bps[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Traffic Report BPS': []
+		}
 
-			if not dp_attr['Policies']:
-				continue
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		rules_table = device_policies.get('rsIDSNewRulesTable', [])
 
-			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-				pol_name = pol_attr["rsIDSNewRulesName"]
+		for pol_attr in rules_table:
+			pol_name = pol_attr.get("rsIDSNewRulesName")
+			if pol_name:  # Optional check if name exists
+				# traffic_report_bps = self.getTrafficStatsBPS(dev_list_dp_ip,pol_name) # THis is for older Vision versions
+				traffic_report_bps = self.ams_stats_dashboards(dev_list_dp_ip, pol_name, units="bps")
+				traffic_stats_dict_bps[dev_list_dp_ip]['Traffic Report BPS'].append(traffic_report_bps)
 
-				traffic_report_bps = self.getTrafficStatsBPS(dp_ip,pol_name)
-				
-
-				traffic_stats_dict_bps[dp_ip]['Traffic Report BPS'].append(traffic_report_bps)
-				
-		
 		return traffic_stats_dict_bps
 	
-	def getTrafficUtilizationPPS(self,full_pol_dic,traffic_stats_dict_pps):
+	def getTrafficUtilizationPPS(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_pps):
+		# Get Traffic Utilization PPS - Packets per second per DefensePro
+		traffic_stats_dict_pps[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Traffic Report PPS': []
+		}
 
-		for dp_ip,dp_attr in full_pol_dic.items():
-
-			traffic_stats_dict_pps[dp_ip] = {}
-			traffic_stats_dict_pps[dp_ip]['Name'] = dp_attr['Name']
-			traffic_stats_dict_pps[dp_ip]['Traffic Report PPS'] = []
-
-			if not dp_attr['Policies']:
-				continue
-
-			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-				pol_name = pol_attr["rsIDSNewRulesName"]
-
-				traffic_report_pps = self.getTrafficStatsPPS(dp_ip,pol_name)
-				
-
-				traffic_stats_dict_pps[dp_ip]['Traffic Report PPS'].append(traffic_report_pps)
-				
+		device_policies_list = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
 		
+		for pol_attr in device_policies_list['rsIDSNewRulesTable']:
+			pol_name = pol_attr.get("rsIDSNewRulesName")
+			if pol_name:
+				# traffic_report_pps = self.getTrafficStatsPPS(dev_list_dp_ip, pol_name) # THis is for older Vision versions
+				traffic_report_pps = self.ams_stats_dashboards(dev_list_dp_ip, pol_name, units="pps")
+				traffic_stats_dict_pps[dev_list_dp_ip]['Traffic Report PPS'].append(traffic_report_pps)
+
 		return traffic_stats_dict_pps
 
-	def getTrafficUtilizationCPS(self,full_pol_dic,traffic_stats_dict_cps):
+	def getTrafficUtilizationCPS(self,dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_cps):
+		# Get Traffic Utilization CPS - Connections per second per DefensePro
+		traffic_stats_dict_cps[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Traffic Report CPS': []
+		}
 
-		for dp_ip,dp_attr in full_pol_dic.items():
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		rules_table = device_policies.get('rsIDSNewRulesTable', [])
 
-			traffic_stats_dict_cps[dp_ip] = {}
-			traffic_stats_dict_cps[dp_ip]['Name'] = dp_attr['Name']
-			traffic_stats_dict_cps[dp_ip]['Traffic Report CPS'] = []
+		for pol_attr in rules_table:
+			pol_name = pol_attr.get("rsIDSNewRulesName")
+			if pol_name:
+				traffic_report_cps = self.getTrafficStatsCPS(dev_list_dp_ip, pol_name)
+				traffic_stats_dict_cps[dev_list_dp_ip]['Traffic Report CPS'].append(traffic_report_cps)
 
-			if not dp_attr['Policies']:
-				continue
-
-			for pol_attr in dp_attr['Policies']['rsIDSNewRulesTable']:
-				pol_name = pol_attr["rsIDSNewRulesName"]
-
-				traffic_report_cps = self.getTrafficStatsCPS(dp_ip,pol_name)
-				
-
-				traffic_stats_dict_cps[dp_ip]['Traffic Report CPS'].append(traffic_report_cps)
-				
-		
 		return traffic_stats_dict_cps
 
-	def getCEC(self, full_pol_dic,traffic_stats_dict_cec):
-		#Get CEC - Concurrent Established Connections per DefensePro
 
+	def getCEC(self, dev_list_dp_ip,dev_list_dp_ip_attr, full_pol_dic,traffic_stats_dict_cec):
+		# Get CEC - Concurrent Established Connections per DefensePro
 
-		for dp_ip,dp_attr in full_pol_dic.items():
+		traffic_stats_dict_cec[dev_list_dp_ip] = {
+			'Name': dev_list_dp_ip_attr['Name'],
+			'Traffic Report CEC': []
+		}
 
-			traffic_stats_dict_cec[dp_ip] = {}
-			traffic_stats_dict_cec[dp_ip]['Name'] = dp_attr['Name']
-			traffic_stats_dict_cec[dp_ip]['Traffic Report CEC'] = []
+		device_policies = full_pol_dic.get(dev_list_dp_ip, {}).get('Policies', {})
+		if not device_policies:
+			return traffic_stats_dict_cec
 
-			if not dp_attr['Policies']:
-				continue
-
-		
-			traffic_report_cec = self.getTrafficStatsCEC(dp_ip)
-
-			traffic_stats_dict_cec[dp_ip]['Traffic Report CEC'].append(traffic_report_cec)
-
+		traffic_report_cec = self.getTrafficStatsCEC(dev_list_dp_ip)
+		traffic_stats_dict_cec[dev_list_dp_ip]['Traffic Report CEC'].append(traffic_report_cec)
 
 		return traffic_stats_dict_cec
+
+
+
+
+	def ams_stats_dashboards(self, dp_ip, policy, units, uri = "/mgmt/vrm/monitoring/traffic/periodic/report"):
+
+		api_url = f'https://{self.ip}' + uri
+
+		query = {
+			"direction": "Inbound",
+			"timeInterval": {
+				"from": self.report_duration,
+				"to": None
+			},
+
+		}
+
+		if units == "bps" or units=="pps":
+			query.update({"unit": units})
+
+
+
+		query.update({"selectedDevices":  [
+			{
+				"deviceId": dp_ip,
+				"networkPolicies": [policy],
+				"ports": []
+			}
+			]
+		})
+
+		r = self._post(api_url, json=query)
+
+		print(f'{dp_ip}, {policy}')
+
+		jsonData = json.loads(r.text)
+	
+		TrafficReportListBPS = {policy:jsonData['data']}
+		return TrafficReportListBPS

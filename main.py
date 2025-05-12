@@ -80,7 +80,7 @@ for i in sys.argv:
 		nodpconfigparsing = True
 
 
-def get_data_from_vision(key,val,cust_id= 'None'):
+def get_data_from_vision(dev_list_dp_ip,dev_list_dp_ip_attr,cust_id= 'None'):
 
 	global full_sig_db_dic
 	global full_pol_dic
@@ -100,84 +100,83 @@ def get_data_from_vision(key,val,cust_id= 'None'):
 	global traffic_stats_dict_cec
 	global full_tfprofconf_dic
 
+	print(f'-' * 50)
 
-	print(f'Collecting policies data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting policies data from Defensepro {key}')
-	full_pol_dic = v.getFullPolicyDictionary(key,val,full_pol_dic)
+	print(f'Collecting policies data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting policies data from Defensepro {dev_list_dp_ip}')
+	full_pol_dic = v.getFullPolicyDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic)
 
-	print(f'Collecting network classes data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting network classes data from Defensepro {key}')
-	full_net_dic = v.getFullNetClassDictionary(key,val,full_net_dic)
+	print(f'Collecting network classes data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting network classes data from Defensepro {dev_list_dp_ip}')
+	full_net_dic = v.getFullNetClassDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_net_dic)
 
-	print(f'Collecting signature profiles data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting signature profiles data from Defensepro {key}')
-	full_sig_dic = v.getFullSignatureProfileDictionary(key,val,full_sig_dic)
+	print(f'Collecting signature profiles data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting signature profiles data from Defensepro {dev_list_dp_ip}')
+	full_sig_dic = v.getFullSignatureProfileDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_sig_dic)
 
-	print(f'Collecting BDOS configuration data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting BDOS configuration data from Defensepro {key}')
-	full_bdosprofconf_dic = v.getFullBDOSProfConfigDictionary(key,val,full_bdosprofconf_dic)
+	print(f'Collecting BDOS configuration data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting BDOS configuration data from Defensepro {dev_list_dp_ip}')
+	full_bdosprofconf_dic = v.getFullBDOSProfConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_bdosprofconf_dic)
 
-	print(f'Collecting DNS configuration data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting DNS configuration data from Defensepro {key}')
-	full_dnsprofconf_dic = v.getFullDNSProfConfigDictionary(key,val,full_dnsprofconf_dic)
+	print(f'Collecting DNS configuration data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting DNS configuration data from Defensepro {dev_list_dp_ip}')
+	full_dnsprofconf_dic = v.getFullDNSProfConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_dnsprofconf_dic)
 
-	print(f'Collecting SynFlood configuration data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting SynFlood configuration data from Defensepro {key}')
-	full_synprofconf_dic = v.getFullSYNPConfigDictionary(key,val,full_synprofconf_dic)
+	print(f'Collecting SynFlood configuration data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting SynFlood configuration data from Defensepro {dev_list_dp_ip}')
+	full_synprofconf_dic = v.getFullSYNPConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_synprofconf_dic)
 
-	print(f'Collecting Connection Limit configuration data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting Connection Limit configuration data from Defensepro {key}')
-	full_connlimprofconf_dic = v.getFullConnlimConfigDictionary(key,val,full_connlimprofconf_dic)
+	print(f'Collecting Connection Limit configuration data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting Connection Limit configuration data from Defensepro {dev_list_dp_ip}')
+	full_connlimprofconf_dic = v.getFullConnlimConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_connlimprofconf_dic)
 
-	print(f'Collecting Out of State configuration data from Defensepro {key}')
-	logging_helper.logging.info(f'Collecting Out of State configuration data from Defensepro {key}')
-	full_oosprofconf_dic = v.getFullOOSConfigDictionary(key,val,full_oosprofconf_dic)
+	print(f'Collecting Out of State configuration data from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting Out of State configuration data from Defensepro {dev_list_dp_ip}')
+	full_oosprofconf_dic = v.getFullOOSConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_oosprofconf_dic)
 
-	print(f'Collecting Signature DB from the Defensepro {key}')
-	logging_helper.logging.info(f'Collecting Signature DB from the Defensepro {key}')
-	full_sig_db_dic = v.getFullSigDB(key,val,full_sig_db_dic)
+	print(f'Collecting Signature DB from the Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting Signature DB from the Defensepro {dev_list_dp_ip}')
+	full_sig_db_dic = v.getFullSigDB(dev_list_dp_ip,dev_list_dp_ip_attr,full_sig_db_dic)
 
-	print(f'Collecting Traffic Filter configuration data from the Defensepro {key}')
-	logging_helper.logging.info(f'Collecting Traffic Filter configuration data from the Defensepro {key}')
-	full_tfprofconf_dic = v.getFullTFConfigDictionary(key,val,full_tfprofconf_dic)
+	print(f'Collecting Traffic Filter configuration data from the Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Collecting Traffic Filter configuration data from the Defensepro {dev_list_dp_ip}')
+	full_tfprofconf_dic = v.getFullTFConfigDictionary(dev_list_dp_ip,dev_list_dp_ip_attr,full_tfprofconf_dic)
 
 
 	if cfg.TRAFFIC_STATS:
-		print(f'Collecting BDOS stats data from Defensepro {key}')
+		print(f'Collecting BDOS stats data from Defensepro {dev_list_dp_ip}')
 		logging_helper.logging.info('Collecting BDOS stats data')
-		bdos_stats_dict = v.getBDOSReportFromVision(full_pol_dic,full_net_dic,bdos_stats_dict,cust_id)
+		bdos_stats_dict = v.getBDOSReportFromVision(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,bdos_stats_dict,cust_id)
 
-		print(f'Collecting BDOS PPS stats data from Defensepro {key}')
+		print(f'Collecting BDOS PPS stats data from Defensepro {dev_list_dp_ip}')
 		logging_helper.logging.info('Collecting BDOS PPS stats data')
-		bdos_stats_dict_pps = v.getBDOSReportFromVision_PPS(key,val,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id)
+		bdos_stats_dict_pps = v.getBDOSReportFromVision_PPS(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,bdos_stats_dict_pps,cust_id)
 	
-
-		print(f'Collecting DNS stats data from Defensepro {key}')
+		print(f'Collecting DNS stats data from Defensepro {dev_list_dp_ip}')
 		logging_helper.logging.info('Collecting DNS stats data')
-		dns_stats_dict = v.getDNSReportFromVision(full_pol_dic,full_net_dic,dns_stats_dict,cust_id)
+		dns_stats_dict = v.getDNSReportFromVision(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,full_net_dic,dns_stats_dict,cust_id)
 
-		print(f'Collecting Traffic Utilization data (BPS) from Defensepro {key}')
-		logging_helper.logging.info(f'Collecting Traffic Utilization data (BPS) from Defensepro {key}')
-		traffic_stats_dict_bps = v.getTrafficUtilizationBPS(full_pol_dic,traffic_stats_dict_bps)
+		print(f'Collecting Traffic Utilization data (BPS) from Defensepro {dev_list_dp_ip}')
+		logging_helper.logging.info(f'Collecting Traffic Utilization data (BPS) from Defensepro {dev_list_dp_ip}')
+		traffic_stats_dict_bps = v.getTrafficUtilizationBPS(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_bps)
 
-		print(f'Collecting Traffic Utilization data (PPS) from Defensepro {key}')
-		logging_helper.logging.info(f'Collecting Traffic Utilization data (PPS) from Defensepro {key}')
-		traffic_stats_dict_pps = v.getTrafficUtilizationPPS(full_pol_dic,traffic_stats_dict_pps)
+		print(f'Collecting Traffic Utilization data (PPS) from Defensepro {dev_list_dp_ip}')
+		logging_helper.logging.info(f'Collecting Traffic Utilization data (PPS) from Defensepro {dev_list_dp_ip}')
+		traffic_stats_dict_pps = v.getTrafficUtilizationPPS(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_pps)
 
-		print(f'Collecting Traffic Utilization data (CPS) from Defensepro {key}')
-		logging_helper.logging.info(f'Collecting Traffic Utilization data (CPS) from Defensepro {key}')
-		traffic_stats_dict_cps = v.getTrafficUtilizationCPS(full_pol_dic,traffic_stats_dict_cps)
+		print(f'Collecting Traffic Utilization data (CPS) from Defensepro {dev_list_dp_ip}')
+		logging_helper.logging.info(f'Collecting Traffic Utilization data (CPS) from Defensepro {dev_list_dp_ip}')
+		traffic_stats_dict_cps = v.getTrafficUtilizationCPS(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_cps)
 
-		print(f'Collecting Traffic Utilization data (CEC) from Defensepro {key}')
-		logging_helper.logging.info(f'Collecting Traffic Utilization data (CEC) from Defensepro {key}')
-		traffic_stats_dict_cec = v.getCEC(full_pol_dic,traffic_stats_dict_cec)
+		print(f'Collecting Traffic Utilization data (CEC) from Defensepro {dev_list_dp_ip}')
+		logging_helper.logging.info(f'Collecting Traffic Utilization data (CEC) from Defensepro {dev_list_dp_ip}')
+		traffic_stats_dict_cec = v.getCEC(dev_list_dp_ip,dev_list_dp_ip_attr,full_pol_dic,traffic_stats_dict_cec)
 
 
-	print(f'Downloading configuration file from Defensepro {key}')
-	logging_helper.logging.info(f'Downloading configuration file from Defensepro {key}')
-	v.getDPConfigByDevice(key)
+	print(f'Downloading configuration file from Defensepro {dev_list_dp_ip}')
+	logging_helper.logging.info(f'Downloading configuration file from Defensepro {dev_list_dp_ip}')
+	v.getDPConfigByDevice(dev_list_dp_ip)
 
-	print('-' * 25)
 
 
 
@@ -298,10 +297,10 @@ else: #getdatafromvision = True - collect data from vision
 
 		if not cfg.CUSTOMERS_JSON_CUST_ID_LIST:	# if CUSTOMERS_JSON_CUST_ID_LIST is empty, collect all customers
 			print('CUSTOMERS_JSON_CUST_ID_LIST is not defined - collecting data for all customers from customers.json file')
-			print('-' * 25)
+			print('-' * 50)
 		else:
 			print(f'CUSTOMERS_JSON_CUST_ID_LIST is defined - collecting data for customers {cfg.CUSTOMERS_JSON_CUST_ID_LIST}')
-			print('-' * 25)
+			print('-' * 50)
 
 		with open("customers.json") as customers_file:
 			customers = json.load(customers_file)
@@ -322,10 +321,10 @@ else: #getdatafromvision = True - collect data from vision
 
 						v = Vision(vision_ip, vision_user, vision_pass)
 
-						for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
-							if key in dp_list:
+						for dev_list_dp_ip, dev_list_dp_ip_attr in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+							if dev_list_dp_ip in dp_list:
 								
-								get_data_from_vision(key,val,cust_id)
+								get_data_from_vision(dev_list_dp_ip,dev_list_dp_ip_attr,cust_id)
 
 
 				else: #If CUSTOMERS_JSON_CUST_ID_LIST is not empty, collect only the customers defined in the list	
@@ -340,10 +339,10 @@ else: #getdatafromvision = True - collect data from vision
 
 							v = Vision(vision_ip, vision_user, vision_pass)
 
-							for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
-								if key in dp_list:
+							for dev_list_dp_ip, dev_list_dp_ip_attr in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+								if dev_list_dp_ip in dp_list:
 
-									get_data_from_vision(key,val,cust_id)
+									get_data_from_vision(dev_list_dp_ip,dev_list_dp_ip_attr,cust_id)
 
 	else: #If customers.json is set to false, use the scope defined in config.py variable "DP_IP_SCOPE_LIST"
 		print('CUSTOMERS_JSON is set to False - collecting data using the scope from DP_IP_SCOPE_LIST')
@@ -352,26 +351,26 @@ else: #getdatafromvision = True - collect data from vision
 
 		if not cfg.DP_IP_SCOPE_LIST: #If DP_IP_SCOPE_LIST is empty, collect all policies for all DefensePro
 			print('DP_IP_SCOPE_LIST is not defined - collecting data from all DefensePro in Vision')
-			print('-' * 25)
+			print('-' * 50)
 
-			for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+			for dev_list_dp_ip, dev_list_dp_ip_attr in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 
-				get_data_from_vision(key,val,cust_id= 'None')
+				get_data_from_vision(dev_list_dp_ip,dev_list_dp_ip_attr,cust_id= 'None')
 			
 
 		else: #If DP_IP_SCOPE_LIST is defined (not empty), collect all policies for the DefensePro in the list
 			print(f'DP_IP_SCOPE_LIST is defined - collecting data from specific DefensePro from the list {cfg.DP_IP_SCOPE_LIST}')
-			print('-' * 25)
+			print('-' * 50)
 
-			for key, val in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
+			for dev_list_dp_ip, dev_list_dp_ip_attr in v.device_list.items(): #key - DP IP, val - DP Attributes - Type, Name, Version, OrmId
 
-				if key in cfg.DP_IP_SCOPE_LIST:	
+				if dev_list_dp_ip in cfg.DP_IP_SCOPE_LIST:	
 
-					get_data_from_vision(key,val,cust_id= 'None')
+					get_data_from_vision(dev_list_dp_ip,dev_list_dp_ip_attr,cust_id= 'None')
 
 				else:
-					print(f'Skipping data collection for Defensepro {key} - {val["Name"]}. Not in DP_IP_SCOPE_LIST')
-					print('-' * 25)
+					print(f'Skipping data collection for Defensepro {dev_list_dp_ip} - {dev_list_dp_ip_attr["Name"]}. Not in DP_IP_SCOPE_LIST')
+					print('-' * 50)
 
 
 	with open(raw_data_path + 'full_pol_dic.json', 'w') as full_pol_dic_file:

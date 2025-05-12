@@ -440,7 +440,10 @@ V6.3 (10/11/24)
 
 V6.4 (5/9/2025)
 	- Added reauthentication logic if JSESSIONID has expired
-	
+
+V6.5 (5/12/2025)
+	- Fixed an issue with data collection, there was unnecessary loop which was causing the script to stuck when many DefensePro selected
+
 # Functionality planned to be added:
 
 - HTTPS flood protection mapping

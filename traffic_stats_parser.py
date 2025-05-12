@@ -30,9 +30,9 @@ def parseTrafficStatsBPS():
 					row = stamp['row']
 					if row['trafficValue'] is None:
 						continue
-					trafficvalue = int(row['trafficValue'])
-					excluded = int(row['excluded'])
-					discards = int(row['discards'])
+					trafficvalue = float(row['trafficValue'])
+					excluded = float(row['excluded'])
+					discards = float(row['discards'])
 
 
 					if excluded !=0:
@@ -141,7 +141,7 @@ def parseTrafficStatsPPS():
 					if row['trafficValue'] is None:
 						continue
 
-					trafficvalue = int(row['trafficValue'])
+					trafficvalue = float(row['trafficValue'])
 
 					currthroughput_list.append(trafficvalue)
 
