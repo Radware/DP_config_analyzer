@@ -216,7 +216,7 @@ class DataMapper():
 									connlim_action = 'N/A in this version'
 
 
-								connlim_prot_values = connlim_prot_values + f'Protection Name: {connlim_prof_prot["rsIDSConnectionLimitAttackName"]}\r\nProtection ID: {connlim_prof_prot["rsIDSConnectionLimitAttackId"]}\r\nProtection Type: {connlim_type}\r\nProtocol: {connlim_protoctol}\r\nThreshold: {connlim_prof_prot["rsIDSConnectionLimitAttackThreshold"]}\r\nTracking Type: {connlim_tracking_type}\r\nAction: {connlim_action}\r\nPacket Reporting: {connlim_reporting}\r\n------\r\n'
+								connlim_prot_values = connlim_prot_values + f'Protection Name: {connlim_prof_prot["rsIDSConnectionLimitAttackName"]}\r\nProtection ID: {connlim_prof_prot["rsIDSConnectionLimitAttackId"]}\r\nProtection Type: {connlim_type}\r\nProtocol: {connlim_protoctol}\r\nApplication Port: {connlim_prof_prot["rsIDSConnectionLimitAttackAppPort"]}\r\nThreshold: {connlim_prof_prot["rsIDSConnectionLimitAttackThreshold"]}\r\nTracking Type: {connlim_tracking_type}\r\nAction: {connlim_action}\r\nPacket Reporting: {connlim_reporting}\r\n------\r\n'
 
 							connlim_settings.append(connlim_prot_values)
 		return connlim_settings
@@ -323,6 +323,19 @@ class DataMapper():
 
 									tf_rules += f'Rule Name: {tf_prof_rule["rsNewTrafficFilterName"]}'
 									tf_rules += f'\r\nProtection ID: {tf_prof_rule["rsNewTrafficFilterID"]}'
+
+									# Rule Enabled/Disabled
+									if 'rsNewTrafficFilterState' in tf_prof_rule: # Show rule enabled or disabled:
+										if tf_prof_rule['rsNewTrafficFilterState'] == '1':
+											tf_enabled = 'Enabled'
+										else:
+											tf_enabled = 'Disabled'
+										tf_rules += f'\r\nRule State: {tf_enabled}'			
+
+									# Rule Priority
+									if 'rsNewTrafficFilterPriority' in tf_prof_rule: # Show rule priority:
+										tf_priority = tf_prof_rule['rsNewTrafficFilterPriority']
+										tf_rules += f'\r\nRule Priority: {tf_priority}'									
 
 									# FILTER MODE
 									if 'rsNewTrafficFilterMatchCriteria' in tf_prof_rule: # Apply Traffic Filter To:

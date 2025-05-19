@@ -444,6 +444,12 @@ V6.4 (5/9/2025)
 V6.5 (5/12/2025)
 	- Fixed an issue with data collection, there was unnecessary loop which was causing the script to stuck when many DefensePro selected
 
+V6.5.1 (5/19/25 - Cris)
+	- More information added for:
+		- Traffic filters rules: Rule State (Enabled/Disabled) and Rule Priority
+		- Connection Limit Profile: Application Port 
+	Note: TF Rules are not displayed in the csv in the priority order.
+
 # Functionality planned to be added:
 
 - HTTPS flood protection mapping
