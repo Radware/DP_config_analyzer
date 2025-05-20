@@ -438,6 +438,10 @@ V6.2.4.2
 V6.3 (10/11/24)
 	- Added policy priority mapping
 
+V6.3.1 (3/31/25)
+
+	- Fixed a bug to send low baselines report over email
+
 V6.4 (5/9/2025)
 	- Added reauthentication logic if JSESSIONID has expired
 
@@ -457,10 +461,6 @@ V6.5.1 (5/19/25 - Cris)
 2 - review, map each key/value and decide what needs to be mapped and how (how many columns, how exactly)
 3 - get the data through API call
 4 - parse the output and map to csv
-
-V6.3.1 (3/31/25)
-
-	- Fixed a bug to send low baselines report over email
 
 -------------------------------
 
