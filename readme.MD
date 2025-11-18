@@ -444,6 +444,9 @@ V6.4 (5/9/2025)
 V6.5 (5/12/2025)
 	- Fixed an issue with data collection, there was unnecessary loop which was causing the script to stuck when many DefensePro selected
 
+V6.5.1 (11/18/2025)
+	- Fixed an issue with endpoint /config/rsIDSNewRulesTable?count=1024
+
 # Functionality planned to be added:
 
 - HTTPS flood protection mapping

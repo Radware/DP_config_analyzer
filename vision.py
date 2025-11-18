@@ -347,7 +347,7 @@ class Vision:
 	def getPolicyListByDevice(self, dp_ip):
 		# Returns policies list with all its attributes
 		policy_url = self.base_url + "/mgmt/device/byip/" + \
-			dp_ip + "/config/rsIDSNewRulesTable"
+			dp_ip + "/config/rsIDSNewRulesTable?count=1024"
 		# URL params ?count=1000&props=rsIDSNewRulesName
 		r = self._get(url=policy_url)
 		policy_list = r.json()
